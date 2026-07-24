@@ -1,0 +1,9 @@
+# Third-party library source (clone separately, see README)
+alphatab_source/
+
+# Python
+__pycache__/
+*.pyc
+
+# Regeneratable audio stem-separation intermediates
+songs/*/separated/

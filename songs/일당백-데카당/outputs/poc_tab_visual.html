@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>일당백 · 데카당 — Bass TAB</title>
+<style>
+:root {
+  --bg: #14181a;
+  --surface: #1c2224;
+  --surface-raised: #232a2c;
+  --text: #ece4d3;
+  --text-dim: #97a19d;
+  --accent: #c9973f;
+  --accent-soft: rgba(201,151,63,0.16);
+  --line: #3a4245;
+  --line-strong: #4d5659;
+  --radius: 10px;
+}
+:root[data-theme="light"] {
+  --bg: #eeece2;
+  --surface: #ffffff;
+  --surface-raised: #f8f6ee;
+  --text: #201d16;
+  --text-dim: #6b6858;
+  --accent: #8a5f16;
+  --accent-soft: rgba(138,95,22,0.12);
+  --line: #d9d4c3;
+  --line-strong: #c2bca6;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #eeece2;
+    --surface: #ffffff;
+    --surface-raised: #f8f6ee;
+    --text: #201d16;
+    --text-dim: #6b6858;
+    --accent: #8a5f16;
+    --accent-soft: rgba(138,95,22,0.12);
+    --line: #d9d4c3;
+    --line-strong: #c2bca6;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  padding: 2.5rem 1.5rem 4rem;
+  transition: background 0.2s, color 0.2s;
+}
+.wrap { max-width: 1100px; margin: 0 auto; }
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 1.1rem;
+  margin-bottom: 2rem;
+}
+h1 {
+  font-size: 1.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 span { color: var(--accent); }
+.meta {
+  display: flex;
+  gap: 1.4rem;
+  font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.meta b { color: var(--text); font-weight: 600; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.9rem 0.7rem;
+}
+
+.measure {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.85rem 0.6rem;
+}
+.measure-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.55rem;
+  font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+}
+.measure-num {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  font-weight: 600;
+}
+.measure-time {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.string-row {
+  display: flex;
+  align-items: center;
+  height: 22px;
+  gap: 0.4rem;
+}
+.string-label {
+  width: 0.9rem;
+  font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.string-track {
+  position: relative;
+  flex: 1;
+  height: 1px;
+  background: var(--line-strong);
+}
+.fret {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.1rem;
+  text-align: center;
+  padding: 0 1px;
+}
+.fret.open { color: var(--accent); font-weight: 700; }
+
+.durations {
+  position: relative;
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--line);
+  height: 40px;
+}
+.note-glyph {
+  position: absolute;
+  bottom: 2px;
+  transform: translateX(-50%);
+  color: var(--text-dim);
+}
+.note-glyph svg { display: block; overflow: visible; }
+
+footer {
+  max-width: 1100px;
+  margin: 2.5rem auto 0;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.7;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+footer b { color: var(--text); }
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  body { padding: 1.5rem 1rem 3rem; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>일당백 · 데카당 <span>Bass TAB</span></h1>
+  <div class="meta">
+    <span>조성 <b>G minor</b></span>
+    <span>템포 <b>92.3 BPM</b></span>
+    <span>마디 <b>26</b></span>
+    <span>노트 <b>238</b></span>
+  </div>
+</header>
+<div class="grid" id="grid"></div>
+</div>
+<footer>
+  <div class="wrap">
+    표준 4현 베이스 튜닝(<b>E1-A1-D2-G2</b>) 기준 · AI 자동 채보 PoC 결과 — 검증 전 초안입니다.<br>
+    각 마디는 4/4박 기준, 노란 숫자는 개방현(0프렛)을 의미합니다.
+  </div>
+</footer>
+<script>
+const DATA = [{"number": 0, "start": 0.7, "end": 0.7, "notes": [{"string": 3, "fret": 1, "beat": 3.54, "value": "16분음표", "name": "F1", "start": 0.7}], "events": [{"type": "rest", "beat": 0.0, "value": "온음표"}, {"type": "note", "beat": 3.54, "value": "16분음표"}]}, {"number": 1, "start": 1.99, "end": 3.54, "notes": [{"string": 1, "fret": 1, "beat": 1.53, "value": "점16분음표", "name": "D#2", "start": 1.99}, {"string": 1, "fret": 3, "beat": 2.02, "value": "점16분음표", "name": "F2", "start": 2.31}, {"string": 1, "fret": 0, "beat": 2.57, "value": "점16분음표", "name": "D2", "start": 2.67}, {"string": 3, "fret": 3, "beat": 3.0, "value": "점8분음표", "name": "G1", "start": 2.95}, {"string": 3, "fret": 3, "beat": 3.91, "value": "16분음표", "name": "G1", "start": 3.54}], "events": [{"type": "rest", "beat": 0.0, "value": "점4분음표"}, {"type": "note", "beat": 1.53, "value": "점16분음표"}, {"type": "note", "beat": 2.02, "value": "점16분음표"}, {"type": "note", "beat": 2.57, "value": "점16분음표"}, {"type": "note", "beat": 3.0, "value": "점8분음표"}, {"type": "note", "beat": 3.91, "value": "16분음표"}]}, {"number": 2, "start": 3.82, "end": 6.14, "notes": [{"string": 3, "fret": 3, "beat": 0.34, "value": "32분음표", "name": "G1", "start": 3.82}, {"string": 2, "fret": 1, "beat": 0.54, "value": "32분음표", "name": "A#1", "start": 3.95}, {"string": 3, "fret": 3, "beat": 0.83, "value": "32분음표", "name": "G1", "start": 4.14}, {"string": 2, "fret": 1, "beat": 1.03, "value": "점16분음표", "name": "A#1", "start": 4.27}, {"string": 2, "fret": 3, "beat": 1.46, "value": "32분음표", "name": "C2", "start": 4.55}, {"string": 2, "fret": 3, "beat": 1.86, "value": "16분음표", "name": "C2", "start": 4.81}, {"string": 2, "fret": 0, "beat": 2.14, "value": "32분음표", "name": "A1", "start": 4.99}, {"string": 3, "fret": 3, "beat": 2.35, "value": "32분음표", "name": "G1", "start": 5.13}, {"string": 2, "fret": 1, "beat": 2.54, "value": "32분음표", "name": "A#1", "start": 5.25}, {"string": 2, "fret": 0, "beat": 2.71, "value": "32분음표", "name": "A1", "start": 5.36}, {"string": 3, "fret": 3, "beat": 2.86, "value": "32분음표", "name": "G1", "start": 5.46}, {"string": 2, "fret": 1, "beat": 3.03, "value": "점16분음표", "name": "A#1", "start": 5.57}, {"string": 2, "fret": 3, "beat": 3.43, "value": "32분음표", "name": "C2", "start": 5.83}, {"string": 2, "fret": 3, "beat": 3.91, "value": "16분음표", "name": "C2", "start": 6.14}], "events": [{"type": "rest", "beat": 0.0, "value": "점16분음표"}, {"type": "note", "beat": 0.34, "value": "32분음표"}, {"type": "note", "beat": 0.54, "value": "32분음표"}, {"type": "note", "beat": 0.83, "value": "32분음표"}, {"type": "note", "beat": 1.03, "value": "점16분음표"}, {"type": "note", "beat": 1.46, "value": "32분음표"}, {"type": "rest", "beat": 1.64, "value": "16분음표"}, {"type": "note", "beat": 1.86, "value": "16분음표"}, {"type": "note", "beat": 2.14, "value": "32분음표"}, {"type": "note", "beat": 2.35, "value": "32분음표"}, {"type": "note", "beat": 2.54, "value": "32분음표"}, {"type": "note", "beat": 2.71, "value": "32분음표"}, {"type": "note", "beat": 2.86, "value": "32분음표"}, {"type": "note", "beat": 3.03, "value": "점16분음표"}, {"type": "note", "beat": 3.43, "value": "32분음표"}, {"type": "rest", "beat": 3.6, "value": "16분음표"}, {"type": "note", "beat": 3.91, "value": "16분음표"}]}, {"number": 3, "start": 7.13, "end": 8.76, "notes": [{"string": 2, "fret": 3, "beat": 1.43, "value": "32분음표", "name": "C2", "start": 7.13}, {"string": 1, "fret": 3, "beat": 1.55, "value": "점16분음표", "name": "F2", "start": 7.21}, {"string": 1, "fret": 1, "beat": 2.05, "value": "점16분음표", "name": "D#2", "start": 7.53}, {"string": 1, "fret": 0, "beat": 2.55, "value": "점16분음표", "name": "D2", "start": 7.86}, {"string": 3, "fret": 3, "beat": 3.08, "value": "점8분음표", "name": "G1", "start": 8.2}, {"string": 3, "fret": 3, "beat": 3.94, "value": "16분음표", "name": "G1", "start": 8.76}], "events": [{"type": "rest", "beat": 0.0, "value": "점4분음표"}, {"type": "note", "beat": 1.43, "value": "32분음표"}, {"type": "note", "beat": 1.55, "value": "점16분음표"}, {"type": "note", "beat": 2.05, "value": "점16분음표"}, {"type": "note", "beat": 2.55, "value": "점16분음표"}, {"type": "note", "beat": 3.08, "value": "점8분음표"}, {"type": "note", "beat": 3.94, "value": "16분음표"}]}, {"number": 4, "start": 9.05, "end": 11.32, "notes": [{"string": 3, "fret": 3, "beat": 0.38, "value": "32분음표", "name": "G1", "start": 9.05}, {"string": 2, "fret": 1, "beat": 0.58, "value": "32분음표", "name": "A#1", "start": 9.18}, {"string": 3, "fret": 3, "beat": 0.89, "value": "32분음표", "name": "G1", "start": 9.38}, {"string": 2, "fret": 1, "beat": 1.06, "value": "점16분음표", "name": "A#1", "start": 9.49}, {"string": 2, "fret": 3, "beat": 1.45, "value": "16분음표", "name": "C2", "start": 9.74}, {"string": 2, "fret": 3, "beat": 1.91, "value": "16분음표", "name": "C2", "start": 10.04}, {"string": 2, "fret": 0, "beat": 2.15, "value": "32분음표", "name": "A1", "start": 10.2}, {"string": 2, "fret": 1, "beat": 2.57, "value": "32분음표", "name": "A#1", "start": 10.47}, {"string": 2, "fret": 0, "beat": 2.72, "value": "32분음표", "name": "A1", "start": 10.57}, {"string": 3, "fret": 3, "beat": 2.89, "value": "32분음표", "name": "G1", "start": 10.68}, {"string": 2, "fret": 1, "beat": 3.06, "value": "점16분음표", "name": "A#1", "start": 10.79}, {"string": 2, "fret": 3, "beat": 3.43, "value": "32분음표", "name": "C2", "start": 11.03}, {"string": 2, "fret": 3, "beat": 3.88, "value": "16분음표", "name": "C2", "start": 11.32}], "events": [{"type": "rest", "beat": 0.0, "value": "점16분음표"}, {"type": "note", "beat": 0.38, "value": "32분음표"}, {"type": "note", "beat": 0.58, "value": "32분음표"}, {"type": "note", "beat": 0.89, "value": "32분음표"}, {"type": "note", "beat": 1.06, "value": "점16분음표"}, {"type": "note", "beat": 1.45, "value": "16분음표"}, {"type": "rest", "beat": 1.67, "value": "16분음표"}, {"type": "note", "beat": 1.91, "value": "16분음표"}, {"type": "note", "beat": 2.15, "value": "32분음표"}, {"type": "rest", "beat": 2.27, "value": "16분음표"}, {"type": "note", "beat": 2.57, "value": "32분음표"}, {"type": "note", "beat": 2.72, "value": "32분음표"}, {"type": "note", "beat": 2.89, "value": "32분음표"}, {"type": "note", "beat": 3.06, "value": "점16분음표"}, {"type": "note", "beat": 3.43, "value": "32분음표"}, {"type": "rest", "beat": 3.6, "value": "16분음표"}, {"type": "note", "beat": 3.88, "value": "16분음표"}]}, {"number": 5, "start": 11.5, "end": 13.96, "notes": [{"string": 2, "fret": 0, "beat": 0.15, "value": "점16분음표", "name": "A1", "start": 11.5}, {"string": 2, "fret": 3, "beat": 1.44, "value": "32분음표", "name": "C2", "start": 12.34}, {"string": 1, "fret": 1, "beat": 1.58, "value": "점16분음표", "name": "D#2", "start": 12.43}, {"string": 1, "fret": 3, "beat": 2.07, "value": "점16분음표", "name": "F2", "start": 12.75}, {"string": 1, "fret": 0, "beat": 2.58, "value": "점16분음표", "name": "D2", "start": 13.08}, {"string": 3, "fret": 3, "beat": 3.04, "value": "점8분음표", "name": "G1", "start": 13.38}, {"string": 3, "fret": 3, "beat": 3.94, "value": "16분음표", "name": "G1", "start": 13.96}], "events": [{"type": "note", "beat": 0.15, "value": "점16분음표"}, {"type": "rest", "beat": 0.58, "value": "점8분음표"}, {"type": "note", "beat": 1.44, "value": "32분음표"}, {"type": "note", "beat": 1.58, "value": "점16분음표"}, {"type": "note", "beat": 2.07, "value": "점16분음표"}, {"type": "note", "beat": 2.58, "value": "점16분음표"}, {"type": "note", "beat": 3.04, "value": "점8분음표"}, {"type": "note", "beat": 3.94, "value": "16분음표"}]}, {"number": 6, "start": 14.26, "end": 16.58, "notes": [{"string": 3, "fret": 3, "beat": 0.4, "value": "32분음표", "name": "G1", "start": 14.26}, {"string": 2, "fret": 1, "beat": 0.58, "value": "32분음표", "name": "A#1", "start": 14.38}, {"string": 3, "fret": 3, "beat": 0.89, "value": "32분음표", "name": "G1", "start": 14.58}, {"string": 2, "fret": 1, "beat": 1.07, "value": "점16분음표", "name": "A#1", "start": 14.7}, {"string": 2, "fret": 3, "beat": 1.47, "value": "32분음표", "name": "C2", "start": 14.96}, {"string": 2, "fret": 0, "beat": 1.67, "value": "32분음표", "name": "A1", "start": 15.09}, {"string": 2, "fret": 3, "beat": 1.94, "value": "16분음표", "name": "C2", "start": 15.26}, {"string": 2, "fret": 0, "beat": 2.18, "value": "32분음표", "name": "A1", "start": 15.42}, {"string": 3, "fret": 3, "beat": 2.43, "value": "32분음표", "name": "G1", "start": 15.58}, {"string": 2, "fret": 1, "beat": 2.6, "value": "16분음표", "name": "A#1", "start": 15.69}, {"string": 3, "fret": 3, "beat": 2.9, "value": "32분음표", "name": "G1", "start": 15.89}, {"string": 2, "fret": 1, "beat": 3.09, "value": "16분음표", "name": "A#1", "start": 16.01}, {"string": 2, "fret": 3, "beat": 3.47, "value": "32분음표", "name": "C2", "start": 16.26}, {"string": 1, "fret": 0, "beat": 3.7, "value": "32분음표", "name": "D2", "start": 16.41}, {"string": 1, "fret": 3, "beat": 3.97, "value": "32분음표", "name": "F2", "start": 16.58}], "events": [{"type": "rest", "beat": 0.0, "value": "점16분음표"}, {"type": "note", "beat": 0.4, "value": "32분음표"}, {"type": "note", "beat": 0.58, "value": "32분음표"}, {"type": "note", "beat": 0.89, "value": "32분음표"}, {"type": "note", "beat": 1.07, "value": "점16분음표"}, {"type": "note", "beat": 1.47, "value": "32분음표"}, {"type": "note", "beat": 1.67, "value": "32분음표"}, {"type": "note", "beat": 1.94, "value": "16분음표"}, {"type": "note", "beat": 2.18, "value": "32분음표"}, {"type": "note", "beat": 2.43, "value": "32분음표"}, {"type": "note", "beat": 2.6, "value": "16분음표"}, {"type": "note", "beat": 2.9, "value": "32분음표"}, {"type": "note", "beat": 3.09, "value": "16분음표"}, {"type": "note", "beat": 3.47, "value": "32분음표"}, {"type": "note", "beat": 3.7, "value": "32분음표"}, {"type": "note", "beat": 3.97, "value": "32분음표"}]}, {"number": 7, "start": 16.73, "end": 19.18, "notes": [{"string": 1, "fret": 1, "beat": 0.2, "value": "16분음표", "name": "D#2", "start": 16.73}, {"string": 2, "fret": 3, "beat": 0.46, "value": "32분음표", "name": "C2", "start": 16.9}, {"string": 2, "fret": 1, "beat": 0.63, "value": "16분음표", "name": "A#1", "start": 17.01}, {"string": 2, "fret": 3, "beat": 0.97, "value": "32분음표", "name": "C2", "start": 17.23}, {"string": 1, "fret": 0, "beat": 1.2, "value": "32분음표", "name": "D2", "start": 17.38}, {"string": 0, "fret": 0, "beat": 1.47, "value": "32분음표", "name": "G2", "start": 17.56}, {"string": 1, "fret": 3, "beat": 1.67, "value": "32분음표", "name": "F2", "start": 17.69}, {"string": 1, "fret": 0, "beat": 1.95, "value": "32분음표", "name": "D2", "start": 17.87}, {"string": 1, "fret": 3, "beat": 2.13, "value": "16분음표", "name": "F2", "start": 17.99}, {"string": 2, "fret": 1, "beat": 2.58, "value": "8분음표", "name": "A#1", "start": 18.28}, {"string": 3, "fret": 3, "beat": 3.15, "value": "점8분음표", "name": "G1", "start": 18.65}, {"string": 3, "fret": 3, "beat": 3.96, "value": "32분음표", "name": "G1", "start": 19.18}], "events": [{"type": "rest", "beat": 0.0, "value": "16분음표"}, {"type": "note", "beat": 0.2, "value": "16분음표"}, {"type": "note", "beat": 0.46, "value": "32분음표"}, {"type": "note", "beat": 0.63, "value": "16분음표"}, {"type": "note", "beat": 0.97, "value": "32분음표"}, {"type": "note", "beat": 1.2, "value": "32분음표"}, {"type": "note", "beat": 1.47, "value": "32분음표"}, {"type": "note", "beat": 1.67, "value": "32분음표"}, {"type": "note", "beat": 1.95, "value": "32분음표"}, {"type": "note", "beat": 2.13, "value": "16분음표"}, {"type": "rest", "beat": 2.33, "value": "16분음표"}, {"type": "note", "beat": 2.58, "value": "8분음표"}, {"type": "note", "beat": 3.15, "value": "점8분음표"}, {"type": "note", "beat": 3.96, "value": "32분음표"}]}, {"number": 8, "start": 19.32, "end": 21.78, "notes": [{"string": 2, "fret": 1, "beat": 0.18, "value": "16분음표", "name": "A#1", "start": 19.32}, {"string": 2, "fret": 3, "beat": 0.5, "value": "32분음표", "name": "C2", "start": 19.53}, {"string": 1, "fret": 0, "beat": 0.67, "value": "16분음표", "name": "D2", "start": 19.64}, {"string": 0, "fret": 0, "beat": 1.0, "value": "32분음표", "name": "G2", "start": 19.85}, {"string": 2, "fret": 3, "beat": 1.2, "value": "16분음표", "name": "C2", "start": 19.98}, {"string": 0, "fret": 7, "beat": 1.73, "value": "16분음표", "name": "D3", "start": 20.33}, {"string": 1, "fret": 5, "beat": 2.03, "value": "32분음표", "name": "G2", "start": 20.52}, {"string": 0, "fret": 5, "beat": 2.19, "value": "16분음표", "name": "C3", "start": 20.63}, {"string": 1, "fret": 5, "beat": 2.5, "value": "32분음표", "name": "G2", "start": 20.83}, {"string": 1, "fret": 3, "beat": 2.66, "value": "16분음표", "name": "F2", "start": 20.93}, {"string": 0, "fret": 5, "beat": 2.99, "value": "8분음표", "name": "C3", "start": 21.15}, {"string": 0, "fret": 5, "beat": 3.47, "value": "32분음표", "name": "C3", "start": 21.46}, {"string": 0, "fret": 3, "beat": 3.66, "value": "16분음표", "name": "A#2", "start": 21.58}, {"string": 0, "fret": 3, "beat": 3.96, "value": "32분음표", "name": "A#2", "start": 21.78}], "events": [{"type": "note", "beat": 0.18, "value": "16분음표"}, {"type": "note", "beat": 0.5, "value": "32분음표"}, {"type": "note", "beat": 0.67, "value": "16분음표"}, {"type": "note", "beat": 1.0, "value": "32분음표"}, {"type": "note", "beat": 1.2, "value": "16분음표"}, {"type": "rest", "beat": 1.46, "value": "16분음표"}, {"type": "note", "beat": 1.73, "value": "16분음표"}, {"type": "note", "beat": 2.03, "value": "32분음표"}, {"type": "note", "beat": 2.19, "value": "16분음표"}, {"type": "note", "beat": 2.5, "value": "32분음표"}, {"type": "note", "beat": 2.66, "value": "16분음표"}, {"type": "note", "beat": 2.99, "value": "8분음표"}, {"type": "note", "beat": 3.47, "value": "32분음표"}, {"type": "note", "beat": 3.66, "value": "16분음표"}, {"type": "note", "beat": 3.96, "value": "32분음표"}]}, {"number": 9, "start": 21.92, "end": 24.36, "notes": [{"string": 0, "fret": 2, "beat": 0.18, "value": "16분음표", "name": "A2", "start": 21.92}, {"string": 0, "fret": 2, "beat": 0.47, "value": "32분음표", "name": "A2", "start": 22.11}, {"string": 0, "fret": 0, "beat": 0.66, "value": "16분음표", "name": "G2", "start": 22.23}, {"string": 0, "fret": 0, "beat": 0.99, "value": "32분음표", "name": "G2", "start": 22.45}, {"string": 1, "fret": 3, "beat": 1.19, "value": "16분음표", "name": "F2", "start": 22.58}, {"string": 1, "fret": 3, "beat": 1.49, "value": "32분음표", "name": "F2", "start": 22.77}, {"string": 2, "fret": 3, "beat": 1.7, "value": "16분음표", "name": "C2", "start": 22.91}, {"string": 2, "fret": 3, "beat": 1.98, "value": "32분음표", "name": "C2", "start": 23.09}, {"string": 1, "fret": 3, "beat": 2.19, "value": "점16분음표", "name": "F2", "start": 23.23}, {"string": 1, "fret": 0, "beat": 2.67, "value": "16분음표", "name": "D2", "start": 23.54}, {"string": 3, "fret": 3, "beat": 3.13, "value": "점8분음표", "name": "G1", "start": 23.84}, {"string": 3, "fret": 3, "beat": 3.93, "value": "32분음표", "name": "G1", "start": 24.36}], "events": [{"type": "note", "beat": 0.18, "value": "16분음표"}, {"type": "note", "beat": 0.47, "value": "32분음표"}, {"type": "note", "beat": 0.66, "value": "16분음표"}, {"type": "note", "beat": 0.99, "value": "32분음표"}, {"type": "note", "beat": 1.19, "value": "16분음표"}, {"type": "note", "beat": 1.49, "value": "32분음표"}, {"type": "note", "beat": 1.7, "value": "16분음표"}, {"type": "note", "beat": 1.98, "value": "32분음표"}, {"type": "note", "beat": 2.19, "value": "점16분음표"}, {"type": "note", "beat": 2.67, "value": "16분음표"}, {"type": "note", "beat": 3.13, "value": "점8분음표"}, {"type": "note", "beat": 3.93, "value": "32분음표"}]}, {"number": 10, "start": 24.5, "end": 26.78, "notes": [{"string": 3, "fret": 6, "beat": 0.15, "value": "16분음표", "name": "A#1", "start": 24.5}, {"string": 3, "fret": 8, "beat": 0.47, "value": "32분음표", "name": "C2", "start": 24.71}, {"string": 3, "fret": 8, "beat": 1.18, "value": "16분음표", "name": "C2", "start": 25.17}, {"string": 0, "fret": 7, "beat": 1.7, "value": "16분음표", "name": "D3", "start": 25.51}, {"string": 1, "fret": 5, "beat": 1.96, "value": "32분음표", "name": "G2", "start": 25.68}, {"string": 0, "fret": 5, "beat": 2.16, "value": "16분음표", "name": "C3", "start": 25.81}, {"string": 1, "fret": 3, "beat": 2.61, "value": "16분음표", "name": "F2", "start": 26.1}, {"string": 0, "fret": 5, "beat": 2.95, "value": "8분음표", "name": "C3", "start": 26.32}, {"string": 0, "fret": 5, "beat": 3.45, "value": "32분음표", "name": "C3", "start": 26.65}, {"string": 0, "fret": 8, "beat": 3.65, "value": "점16분음표", "name": "D#3", "start": 26.78}], "events": [{"type": "note", "beat": 0.15, "value": "16분음표"}, {"type": "note", "beat": 0.47, "value": "32분음표"}, {"type": "rest", "beat": 0.61, "value": "8분음표"}, {"type": "note", "beat": 1.18, "value": "16분음표"}, {"type": "rest", "beat": 1.44, "value": "16분음표"}, {"type": "note", "beat": 1.7, "value": "16분음표"}, {"type": "note", "beat": 1.96, "value": "32분음표"}, {"type": "note", "beat": 2.16, "value": "16분음표"}, {"type": "note", "beat": 2.61, "value": "16분음표"}, {"type": "note", "beat": 2.95, "value": "8분음표"}, {"type": "note", "beat": 3.45, "value": "32분음표"}, {"type": "note", "beat": 3.65, "value": "점16분음표"}]}, {"number": 11, "start": 27.09, "end": 29.05, "notes": [{"string": 0, "fret": 7, "beat": 0.13, "value": "16분음표", "name": "D3", "start": 27.09}, {"string": 1, "fret": 8, "beat": 0.62, "value": "16분음표", "name": "A#2", "start": 27.41}, {"string": 1, "fret": 10, "beat": 0.96, "value": "16분음표", "name": "C3", "start": 27.63}, {"string": 1, "fret": 10, "beat": 1.41, "value": "32분음표", "name": "C3", "start": 27.92}, {"string": 0, "fret": 10, "beat": 1.61, "value": "점16분음표", "name": "F3", "start": 28.05}, {"string": 0, "fret": 8, "beat": 2.15, "value": "점16분음표", "name": "D#3", "start": 28.4}, {"string": 0, "fret": 7, "beat": 2.64, "value": "점16분음표", "name": "D3", "start": 28.72}, {"string": 3, "fret": 3, "beat": 3.15, "value": "점8분음표", "name": "G1", "start": 29.05}], "events": [{"type": "note", "beat": 0.13, "value": "16분음표"}, {"type": "note", "beat": 0.62, "value": "16분음표"}, {"type": "note", "beat": 0.96, "value": "16분음표"}, {"type": "rest", "beat": 1.16, "value": "16분음표"}, {"type": "note", "beat": 1.41, "value": "32분음표"}, {"type": "note", "beat": 1.61, "value": "점16분음표"}, {"type": "note", "beat": 2.15, "value": "점16분음표"}, {"type": "note", "beat": 2.64, "value": "점16분음표"}, {"type": "note", "beat": 3.15, "value": "점8분음표"}]}, {"number": 12, "start": 29.75, "end": 32.18, "notes": [{"string": 3, "fret": 6, "beat": 0.22, "value": "16분음표", "name": "A#1", "start": 29.75}, {"string": 3, "fret": 8, "beat": 1.18, "value": "32분음표", "name": "C2", "start": 30.37}, {"string": 0, "fret": 7, "beat": 1.71, "value": "16분음표", "name": "D3", "start": 30.72}, {"string": 0, "fret": 5, "beat": 2.14, "value": "16분음표", "name": "C3", "start": 31.0}, {"string": 1, "fret": 5, "beat": 2.45, "value": "32분음표", "name": "G2", "start": 31.2}, {"string": 1, "fret": 3, "beat": 2.59, "value": "점16분음표", "name": "F2", "start": 31.29}, {"string": 0, "fret": 5, "beat": 2.99, "value": "점16분음표", "name": "C3", "start": 31.55}, {"string": 0, "fret": 5, "beat": 3.45, "value": "32분음표", "name": "C3", "start": 31.85}, {"string": 0, "fret": 3, "beat": 3.67, "value": "16분음표", "name": "A#2", "start": 31.99}, {"string": 0, "fret": 3, "beat": 3.96, "value": "32분음표", "name": "A#2", "start": 32.18}], "events": [{"type": "rest", "beat": 0.0, "value": "16분음표"}, {"type": "note", "beat": 0.22, "value": "16분음표"}, {"type": "rest", "beat": 0.47, "value": "점8분음표"}, {"type": "note", "beat": 1.18, "value": "32분음표"}, {"type": "rest", "beat": 1.35, "value": "점16분음표"}, {"type": "note", "beat": 1.71, "value": "16분음표"}, {"type": "rest", "beat": 1.93, "value": "16분음표"}, {"type": "note", "beat": 2.14, "value": "16분음표"}, {"type": "note", "beat": 2.45, "value": "32분음표"}, {"type": "note", "beat": 2.59, "value": "점16분음표"}, {"type": "note", "beat": 2.99, "value": "점16분음표"}, {"type": "note", "beat": 3.45, "value": "32분음표"}, {"type": "note", "beat": 3.67, "value": "16분음표"}, {"type": "note", "beat": 3.96, "value": "32분음표"}]}, {"number": 13, "start": 32.3, "end": 34.25, "notes": [{"string": 0, "fret": 2, "beat": 0.14, "value": "16분음표", "name": "A2", "start": 32.3}, {"string": 0, "fret": 2, "beat": 0.47, "value": "32분음표", "name": "A2", "start": 32.51}, {"string": 0, "fret": 0, "beat": 0.67, "value": "16분음표", "name": "G2", "start": 32.64}, {"string": 0, "fret": 0, "beat": 0.98, "value": "32분음표", "name": "G2", "start": 32.84}, {"string": 1, "fret": 3, "beat": 1.17, "value": "16분음표", "name": "F2", "start": 32.97}, {"string": 1, "fret": 3, "beat": 1.45, "value": "32분음표", "name": "F2", "start": 33.15}, {"string": 2, "fret": 3, "beat": 1.67, "value": "8분음표", "name": "C2", "start": 33.29}, {"string": 1, "fret": 3, "beat": 2.17, "value": "점16분음표", "name": "F2", "start": 33.62}, {"string": 1, "fret": 0, "beat": 2.67, "value": "점16분음표", "name": "D2", "start": 33.94}, {"string": 3, "fret": 3, "beat": 3.14, "value": "점8분음표", "name": "G1", "start": 34.25}], "events": [{"type": "note", "beat": 0.14, "value": "16분음표"}, {"type": "note", "beat": 0.47, "value": "32분음표"}, {"type": "note", "beat": 0.67, "value": "16분음표"}, {"type": "note", "beat": 0.98, "value": "32분음표"}, {"type": "note", "beat": 1.17, "value": "16분음표"}, {"type": "note", "beat": 1.45, "value": "32분음표"}, {"type": "note", "beat": 1.67, "value": "8분음표"}, {"type": "note", "beat": 2.17, "value": "점16분음표"}, {"type": "note", "beat": 2.67, "value": "점16분음표"}, {"type": "note", "beat": 3.14, "value": "점8분음표"}]}, {"number": 14, "start": 34.82, "end": 37.2, "notes": [{"string": 3, "fret": 3, "beat": 0.02, "value": "32분음표", "name": "G1", "start": 34.82}, {"string": 3, "fret": 6, "beat": 0.21, "value": "16분음표", "name": "A#1", "start": 34.94}, {"string": 3, "fret": 8, "beat": 0.5, "value": "32분음표", "name": "C2", "start": 35.13}, {"string": 3, "fret": 10, "beat": 0.71, "value": "32분음표", "name": "D2", "start": 35.27}, {"string": 3, "fret": 8, "beat": 1.2, "value": "16분음표", "name": "C2", "start": 35.59}, {"string": 0, "fret": 7, "beat": 1.71, "value": "16분음표", "name": "D3", "start": 35.92}, {"string": 1, "fret": 10, "beat": 2.2, "value": "16분음표", "name": "C3", "start": 36.24}, {"string": 1, "fret": 12, "beat": 2.53, "value": "32분음표", "name": "D3", "start": 36.45}, {"string": 1, "fret": 15, "beat": 2.77, "value": "16분음표", "name": "F3", "start": 36.61}, {"string": 1, "fret": 15, "beat": 3.07, "value": "32분음표", "name": "F3", "start": 36.8}, {"string": 0, "fret": 15, "beat": 3.24, "value": "16분음표", "name": "A#3", "start": 36.91}, {"string": 0, "fret": 15, "beat": 3.56, "value": "32분음표", "name": "A#3", "start": 37.12}, {"string": 1, "fret": 17, "beat": 3.68, "value": "32분음표", "name": "G3", "start": 37.2}], "events": [{"type": "note", "beat": 0.02, "value": "32분음표"}, {"type": "note", "beat": 0.21, "value": "16분음표"}, {"type": "note", "beat": 0.5, "value": "32분음표"}, {"type": "note", "beat": 0.71, "value": "32분음표"}, {"type": "rest", "beat": 0.89, "value": "16분음표"}, {"type": "note", "beat": 1.2, "value": "16분음표"}, {"type": "rest", "beat": 1.46, "value": "16분음표"}, {"type": "note", "beat": 1.71, "value": "16분음표"}, {"type": "note", "beat": 2.2, "value": "16분음표"}, {"type": "note", "beat": 2.53, "value": "32분음표"}, {"type": "note", "beat": 2.77, "value": "16분음표"}, {"type": "note", "beat": 3.07, "value": "32분음표"}, {"type": "note", "beat": 3.24, "value": "16분음표"}, {"type": "note", "beat": 3.56, "value": "32분음표"}, {"type": "note", "beat": 3.68, "value": "32분음표"}]}, {"number": 15, "start": 37.42, "end": 39.53, "notes": [{"string": 2, "fret": 17, "beat": 0.02, "value": "32분음표", "name": "D3", "start": 37.42}, {"string": 0, "fret": 15, "beat": 0.23, "value": "점16분음표", "name": "A#3", "start": 37.56}, {"string": 1, "fret": 15, "beat": 0.88, "value": "32분음표", "name": "F3", "start": 37.98}, {"string": 1, "fret": 12, "beat": 1.08, "value": "32분음표", "name": "D3", "start": 38.11}, {"string": 1, "fret": 10, "beat": 1.25, "value": "점16분음표", "name": "C3", "start": 38.22}, {"string": 2, "fret": 10, "beat": 1.62, "value": "16분음표", "name": "G2", "start": 38.46}, {"string": 1, "fret": 7, "beat": 2.54, "value": "32분음표", "name": "A2", "start": 39.06}, {"string": 1, "fret": 3, "beat": 2.76, "value": "32분음표", "name": "F2", "start": 39.2}, {"string": 3, "fret": 3, "beat": 3.26, "value": "점8분음표", "name": "G1", "start": 39.53}], "events": [{"type": "note", "beat": 0.02, "value": "32분음표"}, {"type": "note", "beat": 0.23, "value": "점16분음표"}, {"type": "rest", "beat": 0.66, "value": "16분음표"}, {"type": "note", "beat": 0.88, "value": "32분음표"}, {"type": "note", "beat": 1.08, "value": "32분음표"}, {"type": "note", "beat": 1.25, "value": "점16분음표"}, {"type": "note", "beat": 1.62, "value": "16분음표"}, {"type": "rest", "beat": 1.82, "value": "점8분음표"}, {"type": "note", "beat": 2.54, "value": "32분음표"}, {"type": "note", "beat": 2.76, "value": "32분음표"}, {"type": "rest", "beat": 2.88, "value": "점16분음표"}, {"type": "note", "beat": 3.26, "value": "점8분음표"}]}, {"number": 16, "start": 40.04, "end": 42.35, "notes": [{"string": 3, "fret": 3, "beat": 0.05, "value": "16분음표", "name": "G1", "start": 40.04}, {"string": 1, "fret": 0, "beat": 0.56, "value": "32분음표", "name": "D2", "start": 40.37}, {"string": 1, "fret": 3, "beat": 0.76, "value": "16분음표", "name": "F2", "start": 40.5}, {"string": 2, "fret": 1, "beat": 1.31, "value": "점16분음표", "name": "A#1", "start": 40.86}, {"string": 2, "fret": 3, "beat": 1.71, "value": "32분음표", "name": "C2", "start": 41.12}, {"string": 2, "fret": 3, "beat": 2.08, "value": "16분음표", "name": "C2", "start": 41.36}, {"string": 1, "fret": 0, "beat": 2.56, "value": "32분음표", "name": "D2", "start": 41.67}, {"string": 1, "fret": 3, "beat": 2.76, "value": "16분음표", "name": "F2", "start": 41.8}, {"string": 0, "fret": 0, "beat": 3.11, "value": "32분음표", "name": "G2", "start": 42.03}, {"string": 0, "fret": 3, "beat": 3.23, "value": "점16분음표", "name": "A#2", "start": 42.11}, {"string": 0, "fret": 5, "beat": 3.6, "value": "16분음표", "name": "C3", "start": 42.35}], "events": [{"type": "note", "beat": 0.05, "value": "16분음표"}, {"type": "rest", "beat": 0.31, "value": "16분음표"}, {"type": "note", "beat": 0.56, "value": "32분음표"}, {"type": "note", "beat": 0.76, "value": "16분음표"}, {"type": "rest", "beat": 1.01, "value": "16분음표"}, {"type": "note", "beat": 1.31, "value": "점16분음표"}, {"type": "note", "beat": 1.71, "value": "32분음표"}, {"type": "rest", "beat": 1.85, "value": "16분음표"}, {"type": "note", "beat": 2.08, "value": "16분음표"}, {"type": "rest", "beat": 2.31, "value": "16분음표"}, {"type": "note", "beat": 2.56, "value": "32분음표"}, {"type": "note", "beat": 2.76, "value": "16분음표"}, {"type": "note", "beat": 3.11, "value": "32분음표"}, {"type": "note", "beat": 3.23, "value": "점16분음표"}, {"type": "note", "beat": 3.6, "value": "16분음표"}]}, {"number": 17, "start": 42.63, "end": 44.72, "notes": [{"string": 0, "fret": 5, "beat": 0.03, "value": "16분음표", "name": "C3", "start": 42.63}, {"string": 1, "fret": 5, "beat": 0.53, "value": "32분음표", "name": "G2", "start": 42.95}, {"string": 0, "fret": 3, "beat": 0.69, "value": "16분음표", "name": "A#2", "start": 43.06}, {"string": 0, "fret": 5, "beat": 1.0, "value": "32분음표", "name": "C3", "start": 43.26}, {"string": 0, "fret": 7, "beat": 1.2, "value": "점16분음표", "name": "D3", "start": 43.39}, {"string": 0, "fret": 10, "beat": 1.68, "value": "16분음표", "name": "F3", "start": 43.7}, {"string": 0, "fret": 7, "beat": 2.2, "value": "16분음표", "name": "D3", "start": 44.04}, {"string": 0, "fret": 3, "beat": 2.71, "value": "점16분음표", "name": "A#2", "start": 44.37}, {"string": 3, "fret": 3, "beat": 3.25, "value": "점8분음표", "name": "G1", "start": 44.72}], "events": [{"type": "note", "beat": 0.03, "value": "16분음표"}, {"type": "rest", "beat": 0.26, "value": "16분음표"}, {"type": "note", "beat": 0.53, "value": "32분음표"}, {"type": "note", "beat": 0.69, "value": "16분음표"}, {"type": "note", "beat": 1.0, "value": "32분음표"}, {"type": "note", "beat": 1.2, "value": "점16분음표"}, {"type": "note", "beat": 1.68, "value": "16분음표"}, {"type": "rest", "beat": 1.99, "value": "16분음표"}, {"type": "note", "beat": 2.2, "value": "16분음표"}, {"type": "rest", "beat": 2.48, "value": "16분음표"}, {"type": "note", "beat": 2.71, "value": "점16분음표"}, {"type": "note", "beat": 3.25, "value": "점8분음표"}]}, {"number": 18, "start": 45.23, "end": 47.65, "notes": [{"string": 3, "fret": 3, "beat": 0.03, "value": "32분음표", "name": "G1", "start": 45.23}, {"string": 1, "fret": 3, "beat": 0.74, "value": "16분음표", "name": "F2", "start": 45.69}, {"string": 2, "fret": 1, "beat": 1.25, "value": "점16분음표", "name": "A#1", "start": 46.02}, {"string": 2, "fret": 3, "beat": 2.08, "value": "16분음표", "name": "C2", "start": 46.56}, {"string": 1, "fret": 0, "beat": 2.54, "value": "32분음표", "name": "D2", "start": 46.86}, {"string": 1, "fret": 3, "beat": 2.74, "value": "16분음표", "name": "F2", "start": 46.99}, {"string": 1, "fret": 5, "beat": 3.06, "value": "32분음표", "name": "G2", "start": 47.2}, {"string": 1, "fret": 5, "beat": 3.34, "value": "32분음표", "name": "G2", "start": 47.38}, {"string": 0, "fret": 5, "beat": 3.65, "value": "32분음표", "name": "C3", "start": 47.58}, {"string": 0, "fret": 5, "beat": 3.75, "value": "32분음표", "name": "C3", "start": 47.65}], "events": [{"type": "note", "beat": 0.03, "value": "32분음표"}, {"type": "rest", "beat": 0.21, "value": "8분음표"}, {"type": "note", "beat": 0.74, "value": "16분음표"}, {"type": "rest", "beat": 1.0, "value": "16분음표"}, {"type": "note", "beat": 1.25, "value": "점16분음표"}, {"type": "rest", "beat": 1.59, "value": "8분음표"}, {"type": "note", "beat": 2.08, "value": "16분음표"}, {"type": "rest", "beat": 2.3, "value": "16분음표"}, {"type": "note", "beat": 2.54, "value": "32분음표"}, {"type": "note", "beat": 2.74, "value": "16분음표"}, {"type": "note", "beat": 3.06, "value": "32분음표"}, {"type": "note", "beat": 3.34, "value": "32분음표"}, {"type": "note", "beat": 3.65, "value": "32분음표"}, {"type": "note", "beat": 3.75, "value": "32분음표"}]}, {"number": 19, "start": 47.96, "end": 49.93, "notes": [{"string": 1, "fret": 8, "beat": 0.23, "value": "32분음표", "name": "A#2", "start": 47.96}, {"string": 0, "fret": 10, "beat": 1.25, "value": "32분음표", "name": "F3", "start": 48.62}, {"string": 0, "fret": 10, "beat": 1.51, "value": "32분음표", "name": "F3", "start": 48.79}, {"string": 0, "fret": 10, "beat": 1.74, "value": "32분음표", "name": "F3", "start": 48.94}, {"string": 1, "fret": 8, "beat": 2.26, "value": "32분음표", "name": "A#2", "start": 49.28}, {"string": 3, "fret": 3, "beat": 3.26, "value": "점8분음표", "name": "G1", "start": 49.93}], "events": [{"type": "rest", "beat": 0.0, "value": "16분음표"}, {"type": "note", "beat": 0.23, "value": "32분음표"}, {"type": "rest", "beat": 0.35, "value": "4분음표"}, {"type": "note", "beat": 1.25, "value": "32분음표"}, {"type": "note", "beat": 1.51, "value": "32분음표"}, {"type": "note", "beat": 1.74, "value": "32분음표"}, {"type": "rest", "beat": 1.83, "value": "점16분음표"}, {"type": "note", "beat": 2.26, "value": "32분음표"}, {"type": "rest", "beat": 2.44, "value": "점8분음표"}, {"type": "note", "beat": 3.26, "value": "점8분음표"}]}, {"number": 20, "start": 50.5, "end": 52.54, "notes": [{"string": 3, "fret": 3, "beat": 0.14, "value": "32분음표", "name": "G1", "start": 50.5}, {"string": 1, "fret": 0, "beat": 0.6, "value": "32분음표", "name": "D2", "start": 50.8}, {"string": 1, "fret": 3, "beat": 0.78, "value": "16분음표", "name": "F2", "start": 50.92}, {"string": 0, "fret": 0, "beat": 1.08, "value": "32분음표", "name": "G2", "start": 51.11}, {"string": 1, "fret": 0, "beat": 2.58, "value": "32분음표", "name": "D2", "start": 52.09}, {"string": 1, "fret": 3, "beat": 2.77, "value": "16분음표", "name": "F2", "start": 52.21}, {"string": 1, "fret": 5, "beat": 3.06, "value": "32분음표", "name": "G2", "start": 52.4}, {"string": 0, "fret": 8, "beat": 3.28, "value": "점8분음표", "name": "D#3", "start": 52.54}], "events": [{"type": "note", "beat": 0.14, "value": "32분음표"}, {"type": "rest", "beat": 0.26, "value": "점16분음표"}, {"type": "note", "beat": 0.6, "value": "32분음표"}, {"type": "note", "beat": 0.78, "value": "16분음표"}, {"type": "note", "beat": 1.08, "value": "32분음표"}, {"type": "rest", "beat": 1.22, "value": "점4분음표"}, {"type": "note", "beat": 2.58, "value": "32분음표"}, {"type": "note", "beat": 2.77, "value": "16분음표"}, {"type": "note", "beat": 3.06, "value": "32분음표"}, {"type": "note", "beat": 3.28, "value": "점8분음표"}]}, {"number": 21, "start": 53.08, "end": 55.18, "notes": [{"string": 0, "fret": 8, "beat": 0.11, "value": "16분음표", "name": "D#3", "start": 53.08}, {"string": 2, "fret": 5, "beat": 0.63, "value": "32분음표", "name": "D2", "start": 53.42}, {"string": 1, "fret": 3, "beat": 0.83, "value": "16분음표", "name": "F2", "start": 53.55}, {"string": 0, "fret": 0, "beat": 1.15, "value": "32분음표", "name": "G2", "start": 53.76}, {"string": 1, "fret": 3, "beat": 1.6, "value": "16분음표", "name": "F2", "start": 54.05}, {"string": 1, "fret": 2, "beat": 1.8, "value": "16분음표", "name": "E2", "start": 54.18}, {"string": 0, "fret": 3, "beat": 2.26, "value": "16분음표", "name": "A#2", "start": 54.48}, {"string": 0, "fret": 3, "beat": 2.58, "value": "16분음표", "name": "A#2", "start": 54.69}, {"string": 0, "fret": 2, "beat": 2.81, "value": "16분음표", "name": "A2", "start": 54.84}, {"string": 3, "fret": 3, "beat": 3.34, "value": "점8분음표", "name": "G1", "start": 55.18}], "events": [{"type": "note", "beat": 0.11, "value": "16분음표"}, {"type": "rest", "beat": 0.31, "value": "점16분음표"}, {"type": "note", "beat": 0.63, "value": "32분음표"}, {"type": "note", "beat": 0.83, "value": "16분음표"}, {"type": "note", "beat": 1.15, "value": "32분음표"}, {"type": "rest", "beat": 1.3, "value": "16분음표"}, {"type": "note", "beat": 1.6, "value": "16분음표"}, {"type": "note", "beat": 1.8, "value": "16분음표"}, {"type": "note", "beat": 2.26, "value": "16분음표"}, {"type": "note", "beat": 2.58, "value": "16분음표"}, {"type": "note", "beat": 2.81, "value": "16분음표"}, {"type": "rest", "beat": 3.06, "value": "16분음표"}, {"type": "note", "beat": 3.34, "value": "점8분음표"}]}, {"number": 22, "start": 55.68, "end": 57.96, "notes": [{"string": 3, "fret": 3, "beat": 0.1, "value": "16분음표", "name": "G1", "start": 55.68}, {"string": 1, "fret": 0, "beat": 0.61, "value": "32분음표", "name": "D2", "start": 56.01}, {"string": 1, "fret": 3, "beat": 0.78, "value": "16분음표", "name": "F2", "start": 56.12}, {"string": 0, "fret": 0, "beat": 1.09, "value": "32분음표", "name": "G2", "start": 56.32}, {"string": 2, "fret": 1, "beat": 1.3, "value": "점16분음표", "name": "A#1", "start": 56.46}, {"string": 2, "fret": 3, "beat": 1.66, "value": "32분음표", "name": "C2", "start": 56.69}, {"string": 2, "fret": 3, "beat": 2.17, "value": "32분음표", "name": "C2", "start": 57.02}, {"string": 1, "fret": 0, "beat": 2.61, "value": "32분음표", "name": "D2", "start": 57.31}, {"string": 1, "fret": 3, "beat": 2.81, "value": "16분음표", "name": "F2", "start": 57.44}, {"string": 0, "fret": 0, "beat": 3.12, "value": "32분음표", "name": "G2", "start": 57.64}, {"string": 0, "fret": 3, "beat": 3.26, "value": "점16분음표", "name": "A#2", "start": 57.73}, {"string": 0, "fret": 5, "beat": 3.61, "value": "16분음표", "name": "C3", "start": 57.96}], "events": [{"type": "note", "beat": 0.1, "value": "16분음표"}, {"type": "rest", "beat": 0.33, "value": "16분음표"}, {"type": "note", "beat": 0.61, "value": "32분음표"}, {"type": "note", "beat": 0.78, "value": "16분음표"}, {"type": "note", "beat": 1.09, "value": "32분음표"}, {"type": "note", "beat": 1.3, "value": "점16분음표"}, {"type": "note", "beat": 1.66, "value": "32분음표"}, {"type": "rest", "beat": 1.84, "value": "점16분음표"}, {"type": "note", "beat": 2.17, "value": "32분음표"}, {"type": "rest", "beat": 2.35, "value": "16분음표"}, {"type": "note", "beat": 2.61, "value": "32분음표"}, {"type": "note", "beat": 2.81, "value": "16분음표"}, {"type": "note", "beat": 3.12, "value": "32분음표"}, {"type": "note", "beat": 3.26, "value": "점16분음표"}, {"type": "note", "beat": 3.61, "value": "16분음표"}]}, {"number": 23, "start": 58.27, "end": 60.4, "notes": [{"string": 0, "fret": 5, "beat": 0.09, "value": "16분음표", "name": "C3", "start": 58.27}, {"string": 1, "fret": 5, "beat": 0.61, "value": "32분음표", "name": "G2", "start": 58.61}, {"string": 0, "fret": 3, "beat": 0.8, "value": "16분음표", "name": "A#2", "start": 58.73}, {"string": 0, "fret": 2, "beat": 1.29, "value": "32분음표", "name": "A2", "start": 59.05}, {"string": 0, "fret": 3, "beat": 1.6, "value": "32분음표", "name": "A#2", "start": 59.25}, {"string": 0, "fret": 2, "beat": 1.78, "value": "점16분음표", "name": "A2", "start": 59.37}, {"string": 1, "fret": 0, "beat": 2.27, "value": "16분음표", "name": "D2", "start": 59.69}, {"string": 1, "fret": 3, "beat": 2.61, "value": "32분음표", "name": "F2", "start": 59.91}, {"string": 1, "fret": 5, "beat": 2.75, "value": "8분음표", "name": "G2", "start": 60.0}, {"string": 1, "fret": 5, "beat": 3.36, "value": "점4분음표", "name": "G2", "start": 60.4}], "events": [{"type": "note", "beat": 0.09, "value": "16분음표"}, {"type": "rest", "beat": 0.32, "value": "16분음표"}, {"type": "note", "beat": 0.61, "value": "32분음표"}, {"type": "note", "beat": 0.8, "value": "16분음표"}, {"type": "rest", "beat": 1.06, "value": "16분음표"}, {"type": "note", "beat": 1.29, "value": "32분음표"}, {"type": "note", "beat": 1.6, "value": "32분음표"}, {"type": "note", "beat": 1.78, "value": "점16분음표"}, {"type": "note", "beat": 2.27, "value": "16분음표"}, {"type": "note", "beat": 2.61, "value": "32분음표"}, {"type": "note", "beat": 2.75, "value": "8분음표"}, {"type": "note", "beat": 3.36, "value": "점4분음표"}]}, {"number": 24, "start": 61.7, "end": 62.39, "notes": [{"string": 0, "fret": 5, "beat": 1.36, "value": "4분음표", "name": "C3", "start": 61.7}, {"string": 0, "fret": 3, "beat": 2.43, "value": "온음표", "name": "A#2", "start": 62.39}], "events": [{"type": "rest", "beat": 0.0, "value": "점4분음표"}, {"type": "note", "beat": 1.36, "value": "4분음표"}, {"type": "note", "beat": 2.43, "value": "온음표"}]}, {"number": 25, "start": 64.96, "end": 64.96, "notes": [{"string": 0, "fret": 2, "beat": 2.38, "value": "점8분음표", "name": "A2", "start": 64.96}], "events": [{"type": "rest", "beat": 0.0, "value": "2분음표"}, {"type": "note", "beat": 2.38, "value": "점8분음표"}, {"type": "rest", "beat": 3.18, "value": "점8분음표"}]}];
+const STRINGS = ["G", "D", "A", "E"];
+
+const gridEl = document.getElementById('grid');
+for (const measure of DATA) {
+  const card = document.createElement('div');
+  card.className = 'measure';
+
+  const head = document.createElement('div');
+  head.className = 'measure-head';
+  head.innerHTML = `<span class="measure-num">MEASURE ${measure.number}</span>` +
+                    `<span class="measure-time">${measure.start.toFixed(1)}s–${measure.end.toFixed(1)}s</span>`;
+  card.appendChild(head);
+
+  const tab = document.createElement('div');
+  tab.className = 'tab';
+
+  STRINGS.forEach((label, sIdx) => {
+    const row = document.createElement('div');
+    row.className = 'string-row';
+    row.innerHTML = `<span class="string-label">${label}</span><div class="string-track"></div>`;
+    const track = row.querySelector('.string-track');
+    measure.notes.forEach(n => {
+      if (n.string !== sIdx) return;
+      const el = document.createElement('span');
+      el.className = 'fret' + (n.fret === 0 ? ' open' : '');
+      el.style.left = (n.beat / 4 * 100) + '%';
+      el.textContent = n.fret;
+      el.title = `${n.name} · ${n.value} · ${n.start.toFixed(2)}s`;
+      track.appendChild(el);
+    });
+    tab.appendChild(row);
+  });
+  card.appendChild(tab);
+
+  const durations = document.createElement('div');
+  durations.className = 'durations';
+  measure.events.forEach(e => {
+    const glyph = document.createElement('span');
+    glyph.className = 'note-glyph' + (e.type === 'rest' ? ' rest' : '');
+    glyph.style.left = (e.beat / 4 * 100) + '%';
+    glyph.innerHTML = e.type === 'rest' ? restSymbolSVG(e.value) : noteSymbolSVG(e.value);
+    glyph.title = (e.type === 'rest' ? '쉼표 · ' : '') + e.value;
+    durations.appendChild(glyph);
+  });
+  card.appendChild(durations);
+
+  gridEl.appendChild(card);
+}
+
+// 음표 라벨("점8분음표" 등)을 실제 음표 기호(머리+기둥+꼬리)의 SVG로 그린다.
+function noteSymbolSVG(label) {
+  const dotted = label.startsWith('점');
+  const base = dotted ? label.slice(1) : label;
+  const SHAPES = {
+    '온음표':     { flags: 0, head: 'open',   stem: false },
+    '2분음표':    { flags: 0, head: 'open',   stem: true  },
+    '4분음표':    { flags: 0, head: 'filled', stem: true  },
+    '8분음표':    { flags: 1, head: 'filled', stem: true  },
+    '16분음표':   { flags: 2, head: 'filled', stem: true  },
+    '32분음표':   { flags: 3, head: 'filled', stem: true  },
+  };
+  const s = SHAPES[base] || { flags: 0, head: 'filled', stem: true };
+
+  const headCx = 7, headCy = 27, rx = 4.6, ry = 3.4;
+  const stemX = headCx + rx - 0.4;
+  const stemTopBase = 5;
+  const stemTop = s.stem ? stemTopBase : headCy;
+
+  let svg = '';
+  // 음표머리 (온음표/2분음표는 속이 빈 타원, 4분음표 이하는 채워진 타원)
+  svg += `<ellipse cx="${headCx}" cy="${headCy}" rx="${rx}" ry="${ry}" ` +
+         `transform="rotate(-18 ${headCx} ${headCy})" ` +
+         `fill="${s.head === 'filled' ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.1"/>`;
+  // 기둥
+  if (s.stem) {
+    svg += `<line x1="${stemX}" y1="${headCy - 0.5}" x2="${stemX}" y2="${stemTop}" stroke="currentColor" stroke-width="1.2"/>`;
+  }
+  // 꼬리(플래그) — 개수만큼 기둥 위쪽에서 아래로 겹쳐 그림
+  for (let i = 0; i < s.flags; i++) {
+    const fy = stemTop + i * 6.5;
+    svg += `<path d="M ${stemX} ${fy} C ${stemX + 7} ${fy + 2}, ${stemX + 8} ${fy + 7}, ${stemX + 1.5} ${fy + 10} ` +
+           `C ${stemX + 5} ${fy + 6}, ${stemX + 4} ${fy + 3}, ${stemX} ${fy + 1} Z" fill="currentColor"/>`;
+  }
+  // 점음표
+  if (dotted) {
+    svg += `<circle cx="${headCx + rx + 3.5}" cy="${headCy}" r="1.15" fill="currentColor"/>`;
+  }
+
+  const width = 20;
+  return `<svg width="${width}" height="34" viewBox="0 0 20 34">${svg}</svg>`;
+}
+
+// 쉼표 라벨("점4분쉼표" 등)을 실제 쉼표 기호의 SVG로 그린다.
+function restSymbolSVG(label) {
+  const dotted = label.startsWith('점');
+  const base = (dotted ? label.slice(1) : label).replace('음표', '쉼표');
+  const cx = 10, lineY = 16;
+  let svg = '';
+
+  if (base === '온쉼표') {
+    // 기준선 아래에 매달린 사각형
+    svg += `<line x1="4" y1="${lineY}" x2="16" y2="${lineY}" stroke="currentColor" stroke-width="0.6" opacity="0.4"/>`;
+    svg += `<rect x="${cx - 4}" y="${lineY}" width="8" height="3" fill="currentColor"/>`;
+  } else if (base === '2분쉼표') {
+    // 기준선 위에 얹힌 사각형
+    svg += `<line x1="4" y1="${lineY}" x2="16" y2="${lineY}" stroke="currentColor" stroke-width="0.6" opacity="0.4"/>`;
+    svg += `<rect x="${cx - 4}" y="${lineY - 3}" width="8" height="3" fill="currentColor"/>`;
+  } else if (base === '4분쉼표') {
+    // 지그재그(갈지자) 모양
+    svg += `<path d="M ${cx + 2} 8 C ${cx - 2} 10, ${cx + 3} 13, ${cx - 1} 16 ` +
+           `C ${cx - 4} 18, ${cx + 2} 20, ${cx - 1} 23 ` +
+           `C ${cx + 1} 25, ${cx - 3} 26, ${cx - 5} 29" ` +
+           `stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  } else {
+    // 8분/16분/32분쉼표: 대각선 기둥 + 꼬리(고리) n개
+    const flags = base === '8분쉼표' ? 1 : base === '16분쉼표' ? 2 : 3;
+    svg += `<line x1="${cx + 3}" y1="10" x2="${cx - 3}" y2="26" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`;
+    for (let i = 0; i < flags; i++) {
+      const fx = cx + 3 - i * 3.2, fy = 10 + i * 5;
+      svg += `<circle cx="${fx}" cy="${fy}" r="1.7" fill="currentColor"/>`;
+    }
+  }
+
+  if (dotted) {
+    svg += `<circle cx="${cx + 8}" cy="${lineY}" r="1.15" fill="currentColor"/>`;
+  }
+
+  return `<svg width="20" height="34" viewBox="0 0 20 34">${svg}</svg>`;
+}
+</script>
+</body>
+</html>
