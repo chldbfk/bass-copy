@@ -7,7 +7,10 @@ import sys
 import xml.sax.saxutils as sx
 
 from poc_tab_render import parse_notes, filter_scale_noise, resolve_fingering, STRINGS
-from poc_rhythm_quantize import detect_tempo_and_beats, quantize_notes, insert_rests, NOTE_VALUES, nearest_note_value
+from poc_rhythm_quantize import (
+    detect_tempo_and_beats, quantize_notes, insert_rests, NOTE_VALUES, nearest_note_value,
+    snap_notes_to_grid,
+)
 from poc_scale_analysis import estimate_key, MAJOR_SCALE_STEPS, MINOR_SCALE_STEPS, PITCH_CLASS_NAMES
 from poc_chord_detect import detect_chords
 
@@ -124,9 +127,13 @@ def harmony_xml(root_pc, quality, fifths):
     )
 
 
-def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio_path=None, manual_chords=None):
+def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio_path=None, manual_chords=None,
+                    fingering_overrides=None, rhythm_grid=None, note_value_candidates=NOTE_VALUES):
     """manual_chords: {마디번호: (root_pc, quality)} — 사용자가 실제 악보/코드보로 확인해준 정답이
-    있을 때 오디오 기반 코드 인식(chord_audio_path) 대신 그대로 사용한다."""
+    있을 때 오디오 기반 코드 인식(chord_audio_path) 대신 그대로 사용한다.
+    rhythm_grid/note_value_candidates: 단순한 리프(예: 4분/8분음표만 쓰는 곡)에서 피치 검출
+    잡음으로 생긴 자잘한 조각들을 정리하고 싶을 때 snap_notes_to_grid()의 grid_beats 값과
+    poc_rhythm_quantize.SIMPLE_NOTE_VALUES를 넘긴다."""
     notes = parse_notes(notes_path)
     notes = filter_scale_noise(notes)
 
@@ -138,8 +145,11 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
         # quantize_notes는 beat_times[0](첫 비트 시점)만 앵커로 쓰고 나머지 배열은 안 씀 ->
         # 자동 감지된 템포가 틀렸을 때 앵커는 유지한 채 BPM 숫자만 정확한 값으로 교체 가능
         tempo = override_bpm
-    quantized = quantize_notes(notes, tempo, beat_times, beats_per_measure=BEATS_PER_MEASURE)
-    path, groups = resolve_fingering(notes)
+    if rhythm_grid is not None:
+        notes = snap_notes_to_grid(notes, tempo, beat_times, grid_beats=rhythm_grid)
+    quantized = quantize_notes(notes, tempo, beat_times, beats_per_measure=BEATS_PER_MEASURE,
+                                note_value_candidates=note_value_candidates)
+    path, groups = resolve_fingering(notes, fingering_overrides=fingering_overrides)
 
     if manual_chords is not None:
         chords = manual_chords
@@ -178,7 +188,8 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
 
     measures_xml = []
     for m in sorted(quantized_by_measure.keys()):
-        events = insert_rests(quantized_by_measure[m], beats_per_measure=BEATS_PER_MEASURE)
+        events = insert_rests(quantized_by_measure[m], beats_per_measure=BEATS_PER_MEASURE,
+                               note_value_candidates=note_value_candidates)
         durations = scaled_durations(events)
         beams = compute_beams(events)
 
@@ -204,7 +215,7 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
                     slide_xml += '<slide type="start" line-type="solid"/>'
                 notes_xml.append(
                     f"<note><pitch><step>{step}</step>{alter_xml}<octave>{octave}</octave></pitch>"
-                    f"<duration>{dur}</duration><voice>1</voice><type>{note_type}</type>{dot_xml}{beam_xml}"
+                    f'<duration>{dur}</duration><instrument id="P1-I1"/><voice>1</voice><type>{note_type}</type>{dot_xml}{beam_xml}'
                     f"<notations>{slide_xml}<technical><string>{s_idx + 1}</string><fret>{fret}</fret></technical></notations>"
                     f"</note>"
                 )
@@ -234,7 +245,14 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
         '"http://www.musicxml.org/dtds/partwise.dtd">\n'
         '<score-partwise version="4.0">'
         f"<work><work-title>{sx.escape(title)}</work-title></work>"
-        '<part-list><score-part id="P1"><part-name>Bass</part-name></score-part></part-list>'
+        # GM 프로그램 34(1-based) = Electric Bass (finger). midi-instrument만 단독으론
+        # (score-instrument 없이) 무시되고 적용 안 됐음 -> score-instrument를 다시 추가하되,
+        # 이번엔 각 음표에도 <instrument id="P1-I1"/> 참조를 넣어서 어떤 음이 이 악기에
+        # 속하는지 명시적으로 연결한다.
+        '<part-list><score-part id="P1"><part-name>Bass</part-name>'
+        '<score-instrument id="P1-I1"><instrument-name>Electric Bass</instrument-name></score-instrument>'
+        '<midi-instrument id="P1-I1"><midi-channel>1</midi-channel><midi-program>34</midi-program></midi-instrument>'
+        '</score-part></part-list>'
         f'<part id="P1">{"".join(measures_xml)}</part>'
         "</score-partwise>"
     )

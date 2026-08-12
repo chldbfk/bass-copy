@@ -97,7 +97,19 @@ def find_chromatic_runs(notes, max_gap=CHROMATIC_RUN_MAX_GAP, min_len=CHROMATIC_
     return runs
 
 
+def filter_out_of_range(notes):
+    """표준 4현 베이스로는 물리적으로 짚을 수 없는 음높이(E1 미만, G현+MAX_FRET 초과)는
+    스케일/길이와 무관하게 무조건 제거한다. candidates()가 이런 음을 만나면 가장 가까운
+    줄의 최고 프렛(20)으로 억지로 클리핑해버리는데, 그 왜곡된 값이 주변 노트들의
+    포지션 앵커(local_fret_anchors)에 그대로 섞여 들어가 정상적인 구간까지 불필요하게
+    하이프렛 쪽으로 끌려가는 문제가 실제로 발견됨(예: 피치 추출 옥타브 오류로 튄 E4/C#4
+    두 개 때문에 곡 전체 운지가 고포지션으로 밀림)."""
+    min_midi, max_midi = STRINGS[-1][1], STRINGS[0][1] + MAX_FRET
+    return [n for n in notes if min_midi <= n["midi"] <= max_midi]
+
+
 def filter_scale_noise(notes):
+    notes = filter_out_of_range(notes)
     (corr, tonic, mode), _ = estimate_key(notes)
     scale_steps = MAJOR_SCALE_STEPS if mode == "major" else MINOR_SCALE_STEPS
     scale_pcs = {(tonic + s) % 12 for s in scale_steps}
@@ -327,7 +339,33 @@ def propagate_slide_landing(notes, path, slide_ends):
     return path
 
 
-def resolve_fingering(notes):
+def enforce_pitch_consistency(notes, path, pinned, fingering_overrides=None):
+    """리프처럼 같은 음이 곡 전체에서 반복될 때, 국소 앵커 최적화가 주변 문맥에 따라
+    매번 다른 (줄,프렛)을 고르는 경우가 있음(예: 초반엔 D현 7프렛, 후반엔 같은 음을 G현
+    2프렛으로) — 실제 연주자는 같은 리프를 매번 같은 자리로 짚으므로, 슬라이드로 이미
+    고정된(pinned) 노트를 제외한 나머지는 같은 MIDI 음높이끼리 통일된 (줄,프렛)을 쓴다.
+    fingering_overrides={midi: (string_idx, fret)}가 주어지면 다수결 대신 그 값을 그대로
+    쓴다(사용자가 직접 들어보고 특정 음의 자리를 지정해준 경우)."""
+    fingering_overrides = fingering_overrides or {}
+    from collections import Counter
+    votes = {}
+    for i, n in enumerate(notes):
+        if i in pinned or n["midi"] in fingering_overrides:
+            continue
+        votes.setdefault(n["midi"], Counter())[path[i]] += 1
+    majority = {midi: counter.most_common(1)[0][0] for midi, counter in votes.items()}
+
+    def choice_for(i, n):
+        if i in pinned:
+            return path[i]
+        if n["midi"] in fingering_overrides:
+            return fingering_overrides[n["midi"]]
+        return majority[n["midi"]]
+
+    return [choice_for(i, n) for i, n in enumerate(notes)]
+
+
+def resolve_fingering(notes, fingering_overrides=None):
     """전체 운지 파이프라인. 크로매틱 런/옥타브 슬라이드/검증된 도약 슬라이드를 강제 배치한 뒤,
     그 노트들은 고정(pinned)한 채 나머지 노트의 앵커를 새 위치 기준으로 다시 계산해 재최적화한다.
 
@@ -358,6 +396,7 @@ def resolve_fingering(notes):
 
     anchors2 = local_fret_anchors(path, window=ANCHOR_WINDOW)
     final_path = run_dp(notes, anchors=anchors2, pinned=pinned)
+    final_path = enforce_pitch_consistency(notes, final_path, pinned, fingering_overrides=fingering_overrides)
 
     slide_groups = list(runs) + [(i, i + 1) for i in octave_slides] + [(i, i + 1) for i in leap_slides]
     slide_ends = [j for _, j in slide_groups]
