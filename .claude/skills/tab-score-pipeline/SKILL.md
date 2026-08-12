@@ -49,6 +49,8 @@ python poc_pitch_extract.py "songs/<곡이름>/separated/bass.wav" "songs/<곡�
 
 FMIN=35Hz 하한 유지(더 낮추면 torchcrepe 0.0.24의 음수 인덱스 버그 발생). 결과는 `시작s ~ 끝s (길이s)  음이름옥타브` 형식의 노트 시퀀스.
 
+**노트 경계는 onset(어택) 기준** (2026-08-12부터, Stand-By-Me 곡 재생성 중 개선): `librosa.onset.onset_detect`로 실제 타건 시점을 먼저 잡고, 그 구간 안에서 torchcrepe 프레임 중 신뢰도(`PERIODICITY_THRESHOLD=0.35`) 이상인 것들의 중앙값 피치를 노트 음높이로 쓴다. 예전 방식(피치 연속성+임계값만으로 경계를 나눔)은 디케이(decay) 중 신뢰도가 흔들리는 베이스 특성 때문에 한 음이 여러 조각으로 쪼개지거나 꼬리가 통째로 버려지는 문제가 컸음(Stand-By-Me 실측: 커버리지 44%→94%로 개선). 곡 시작과 동시에 소리가 나면 `onset_detect`가 t=0을 못 잡을 수 있어 자동 보정 로직이 들어가 있음.
+
 ## 3. 사용자 확인이 필요한 지점 (반드시 먼저 물어볼 것)
 
 파이프라인을 계속 돌리기 전에 아래 두 가지는 **추측하지 말고 사용자에게 확인**한다:
@@ -70,6 +72,8 @@ path, groups = resolve_fingering(notes)     # (줄,프렛) 경로 + 슬라이드
 - **ASCII TAB**: `poc_final_tab.py`의 `render_tab_by_measure(notes, path, quantized, groups=groups)` — 슬라이드는 "시작프렛/끝프렛" 한 칸으로 압축 표기(`3/6`).
 - **MusicXML**: `poc_export_musicxml.py`의 `build_musicxml(notes_path, audio_path, title, override_bpm=...)` — 슬라이드는 `<slide type="start"/>`~`<slide type="stop"/>`로 시작/끝 노트만 남기고 **중간 경과음은 완전히 생략**(박자 길이는 시작음에 합산). 조성 추정(Krumhansl-Schmuckler)에 따라 조표·음이름 스펠링 자동 결정.
 - **AlphaTab HTML**: `poc_export_alphatab_html.py`의 `main()` — MusicXML을 alphaTab.min.js(인라인 임베드)로 렌더링한 단일 HTML. `LIB_DIR = "alphatab_lib"`이 **프로젝트 루트 기준 상대경로**이므로 스크립트를 반드시 루트에서 실행할 것. CLI: `python poc_export_alphatab_html.py <mp3경로> <notes.txt경로> "<제목>" <output.html경로> [override_bpm]`
+
+**리듬 세분화(4분/8분음표만 vs 16분음표까지)는 더 이상 곡을 듣고 사람이 판단하지 않는다** (2026-08-12부터): `quantize_notes`/`build_musicxml`의 `note_value_candidates`를 안 넘기면(기본값 `None`) `poc_rhythm_quantize.infer_note_grid(notes, tempo)`가 노트 시작 시각 간격(IOI)이 8분음표 격자에 얼마나 잘 맞는지 계산해서 `SIMPLE_NOTE_VALUES`/`NOTE_VALUES` 중 자동으로 고른다. 예전에는 "이 곡은 단순하니까 SIMPLE 쓸게요" 식으로 매 곡 사용자에게 물어봤는데, 이건 애초에 자동화해야 할 판단이라는 지적을 받고 고침 — 앞으로도 곡마다 이 선택을 다시 물어보지 말 것. (단, 자동 판단이 명백히 틀렸다고 사용자가 지적하면 그때는 원인을 고치거나 `note_value_candidates`를 명시적으로 넘겨서 강제할 수 있음.)
 
 전형적인 실행 (BPM 교정이 필요한 경우, `<곡폴더>` = `songs/<곡이름>`):
 ```bash

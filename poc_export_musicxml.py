@@ -8,7 +8,7 @@ import xml.sax.saxutils as sx
 
 from poc_tab_render import parse_notes, filter_scale_noise, resolve_fingering, STRINGS
 from poc_rhythm_quantize import (
-    detect_tempo_and_beats, quantize_notes, insert_rests, NOTE_VALUES, nearest_note_value,
+    detect_tempo_and_beats, quantize_notes, insert_rests, NOTE_VALUES, nearest_note_value, infer_note_grid,
     snap_notes_to_grid,
 )
 from poc_scale_analysis import estimate_key, MAJOR_SCALE_STEPS, MINOR_SCALE_STEPS, PITCH_CLASS_NAMES
@@ -128,12 +128,14 @@ def harmony_xml(root_pc, quality, fifths):
 
 
 def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio_path=None, manual_chords=None,
-                    fingering_overrides=None, rhythm_grid=None, note_value_candidates=NOTE_VALUES):
+                    fingering_overrides=None, rhythm_grid=None, note_value_candidates=None):
     """manual_chords: {마디번호: (root_pc, quality)} — 사용자가 실제 악보/코드보로 확인해준 정답이
     있을 때 오디오 기반 코드 인식(chord_audio_path) 대신 그대로 사용한다.
-    rhythm_grid/note_value_candidates: 단순한 리프(예: 4분/8분음표만 쓰는 곡)에서 피치 검출
-    잡음으로 생긴 자잘한 조각들을 정리하고 싶을 때 snap_notes_to_grid()의 grid_beats 값과
-    poc_rhythm_quantize.SIMPLE_NOTE_VALUES를 넘긴다."""
+    note_value_candidates: 기본값 None이면 infer_note_grid()가 노트 타이밍(IOI) 분포를 보고
+    SIMPLE_NOTE_VALUES(4분/8분만) vs NOTE_VALUES(16분까지) 중 알아서 고른다 — 곡마다 사람이
+    "이 곡은 단순하니까 SIMPLE" 같은 판단을 손으로 넘길 필요 없음. 그래도 특정 값을 강제하고
+    싶으면 poc_rhythm_quantize.SIMPLE_NOTE_VALUES/NOTE_VALUES를 직접 넘기면 됨.
+    rhythm_grid: 그래도 잔여 잡음이 있을 때 snap_notes_to_grid()의 grid_beats 값을 넘긴다."""
     notes = parse_notes(notes_path)
     notes = filter_scale_noise(notes)
 
@@ -147,6 +149,8 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
         tempo = override_bpm
     if rhythm_grid is not None:
         notes = snap_notes_to_grid(notes, tempo, beat_times, grid_beats=rhythm_grid)
+    if note_value_candidates is None:
+        note_value_candidates = infer_note_grid(notes, tempo)
     quantized = quantize_notes(notes, tempo, beat_times, beats_per_measure=BEATS_PER_MEASURE,
                                 note_value_candidates=note_value_candidates)
     path, groups = resolve_fingering(notes, fingering_overrides=fingering_overrides)

@@ -5,6 +5,7 @@ Phase 0 PoC 확장: librosa 비트 트래킹으로 템포(BPM)와 비트 타임�
 (온음표/2분음표/4분음표/8분음표/16분음표)로 근사한다.
 """
 import sys
+import math
 import librosa
 import numpy as np
 
@@ -22,6 +23,27 @@ NOTE_VALUES = [
 # 단순한 리프(피치 검출 잡음으로 실제보다 잘게 쪼개져 보이는 곡)를 위한 축소 어휘 —
 # 4분/8분음표·쉼표만 쓴다. quantize_notes/insert_rests에 note_value_candidates로 넘기면 됨.
 SIMPLE_NOTE_VALUES = [(1.0, "4분음표"), (0.5, "8분음표")]
+
+
+def infer_note_grid(notes, tempo):
+    """SIMPLE_NOTE_VALUES(4분/8분만) vs NOTE_VALUES(16분까지) 중 이 곡에 맞는 어휘를
+    사람이 곡 느낌을 보고 고르지 않고, 노트 시작 시각 간격(IOI)의 실제 분포로 자동 판단한다.
+    IOI를 8분음표(0.5박) 격자에 스냅했을 때 평균 오차가 작으면 이미 8분음표 단위로 충분히
+    설명된다는 뜻 -> SIMPLE 어휘로 충분(16분음표로 쪼갤 근거 없음, 대개 피치검출 잡음).
+    오차가 크면 실제로 8분음표보다 촘촘한 움직임이 있다는 뜻 -> 기본 어휘(16분음표 포함) 사용.
+    2026-08-12: Stand-By-Me 재생성 때 이 판단을 매번 곡마다 손으로 고르다가 사용자 지적으로
+    자동화함(더 이상 곡별로 물어보지 않음) — 재실행/새 곡 모두 이 함수가 대신 판단."""
+    beat_len = 60.0 / tempo
+    starts = sorted(n["start"] for n in notes)
+    if len(starts) < 3:
+        return SIMPLE_NOTE_VALUES
+    iois = [(starts[i + 1] - starts[i]) / beat_len for i in range(len(starts) - 1)]
+    iois = [x for x in iois if x > 0.05]  # 거의 동시(노이즈성 겹침)는 통계에서 제외
+    if not iois:
+        return SIMPLE_NOTE_VALUES
+    grid = 0.5  # 8분음표 = 0.5박
+    rel_err = sum(abs(x - round(x / grid) * grid) for x in iois) / len(iois) / grid
+    return SIMPLE_NOTE_VALUES if rel_err < 0.2 else NOTE_VALUES
 
 
 def detect_tempo_and_beats(audio_path):
@@ -71,10 +93,28 @@ def snap_notes_to_grid(notes, tempo, beat_times, grid_beats=0.5, max_note_beats=
     return result
 
 
-def quantize_notes(notes, tempo, beat_times, beats_per_measure=4, note_value_candidates=NOTE_VALUES):
+def quantize_notes(notes, tempo, beat_times, beats_per_measure=4, note_value_candidates=None):
+    """note_value_candidates를 안 넘기면(기본값) infer_note_grid()가 노트 타이밍 데이터를 보고
+    SIMPLE/기본 어휘 중 뭐가 맞는지 자동으로 고른다 — 곡마다 수동으로 고를 필요 없음."""
+    if note_value_candidates is None:
+        note_value_candidates = infer_note_grid(notes, tempo)
     beat_len = 60.0 / tempo
     # 첫 비트를 마디 1의 1박으로 삼음(가장 단순한 가정)
     first_beat = beat_times[0] if len(beat_times) > 0 else 0.0
+
+    # 앵커(첫 비트 시점)가 실제 첫 노트보다 뒤에 있으면 그 노트가 beat_pos<0이 되어
+    # "마디 0"(또는 음수 마디)이라는 비정상적인 번호로 밀려나고, 그 뒤 모든 마디 번호가
+    # 하나씩 밀려 보임(AlphaTab 등 렌더러는 1번부터 정상적으로 세므로 텍스트 마디 번호와
+    # 렌더된 악보의 마디 번호가 어긋나 버림 — 2026-08-12 Stand-By-Me에서 사용자가 렌더된
+    # 악보 스크린샷으로 발견). BPM을 override했을 때 auto-detected 앵커가 실제 곡 시작보다
+    # 뒤에 있는 경우가 흔하므로, 앵커를 마디(4박) 단위로 통째로 앞당겨서 모든 노트가
+    # beat_pos>=0(마디 1부터)에 들어가도록 보정한다 — 박자 내 위상은 그대로 유지됨.
+    if notes:
+        earliest = min(n["start"] for n in notes)
+        if first_beat > earliest:
+            measure_len = beat_len * beats_per_measure
+            steps = math.ceil((first_beat - earliest) / measure_len)
+            first_beat -= steps * measure_len
 
     quantized = []
     for n in notes:
