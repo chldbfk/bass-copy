@@ -116,11 +116,15 @@ def quantize_notes(notes, tempo, beat_times, beats_per_measure=4, note_value_can
             steps = math.ceil((first_beat - earliest) / measure_len)
             first_beat -= steps * measure_len
 
+    EPS = 1e-6  # 부동소수점 오차 보정용. 예: 마디 경계에 정확히 걸치는 노트가
+    # (t - first_beat)/beat_len 계산 중 부동소수점 오차로 4.0 대신 3.999999999997처럼
+    # 나오면 //로 나눌 때 이전 마디로 잘못 떨어짐(Stand-By-Me에서 실사용자가 "1마디가
+    # 4.5박으로 넘친다"고 확인 — 실제로는 마디2 첫 음이 마디1로 잘못 들어간 표기 오류였음).
     quantized = []
     for n in notes:
         beat_pos = (n["start"] - first_beat) / beat_len
-        measure = int(beat_pos // beats_per_measure) + 1
-        beat_in_measure = beat_pos % beats_per_measure
+        measure = int((beat_pos + EPS) // beats_per_measure) + 1
+        beat_in_measure = (beat_pos + EPS) % beats_per_measure
 
         dur_in_beats = n["dur"] / beat_len if "dur" in n else (n["end"] - n["start"]) / beat_len
         note_value = nearest_note_value(dur_in_beats, note_value_candidates)

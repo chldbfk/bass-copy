@@ -128,7 +128,7 @@ def harmony_xml(root_pc, quality, fifths):
 
 
 def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio_path=None, manual_chords=None,
-                    fingering_overrides=None, rhythm_grid=None, note_value_candidates=None):
+                    fingering_overrides=None, rhythm_grid=None, note_value_candidates=None, override_first_beat=None):
     """manual_chords: {마디번호: (root_pc, quality)} — 사용자가 실제 악보/코드보로 확인해준 정답이
     있을 때 오디오 기반 코드 인식(chord_audio_path) 대신 그대로 사용한다.
     note_value_candidates: 기본값 None이면 infer_note_grid()가 노트 타이밍(IOI) 분포를 보고
@@ -147,6 +147,11 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
         # quantize_notes는 beat_times[0](첫 비트 시점)만 앵커로 쓰고 나머지 배열은 안 씀 ->
         # 자동 감지된 템포가 틀렸을 때 앵커는 유지한 채 BPM 숫자만 정확한 값으로 교체 가능
         tempo = override_bpm
+    if override_first_beat is not None:
+        # 자동감지 앵커가 실제 첫 노트보다 앞서 있으면(quantize_notes의 마디 보정 로직이
+        # 통째로 앞당겨도) 그 사이가 쉼표로 채워짐 -> 첫 음이 곧 마디 1의 1박이 되도록
+        # 앵커 자체를 그 시각으로 고정(사용자가 "쉼표로 시작하지 말라"고 확인해준 경우).
+        beat_times = [override_first_beat]
     if rhythm_grid is not None:
         notes = snap_notes_to_grid(notes, tempo, beat_times, grid_beats=rhythm_grid)
     if note_value_candidates is None:
@@ -249,13 +254,14 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
         '"http://www.musicxml.org/dtds/partwise.dtd">\n'
         '<score-partwise version="4.0">'
         f"<work><work-title>{sx.escape(title)}</work-title></work>"
-        # GM 프로그램 34(1-based) = Electric Bass (finger). midi-instrument만 단독으론
-        # (score-instrument 없이) 무시되고 적용 안 됐음 -> score-instrument를 다시 추가하되,
-        # 이번엔 각 음표에도 <instrument id="P1-I1"/> 참조를 넣어서 어떤 음이 이 악기에
-        # 속하는지 명시적으로 연결한다.
+        # GM 프로그램 36(1-based) = Fretless Bass. 34(Electric Bass finger)는 지금 쓰는
+        # 사운드폰트(sonivox.sf2)에서 슬랩처럼 어택이 강하게 들려서, 프렛 없이 핑거스타일로
+        # 연주해 음이 매끄럽게 이어지는(부드러운 톤) 프렛리스 베이스로 교체함(사용자 확인).
+        # midi-instrument만 단독으론(score-instrument 없이) 무시되고 적용 안 됐어서
+        # score-instrument + 각 음표의 <instrument id="P1-I1"/> 참조까지 같이 넣음.
         '<part-list><score-part id="P1"><part-name>Bass</part-name>'
-        '<score-instrument id="P1-I1"><instrument-name>Electric Bass</instrument-name></score-instrument>'
-        '<midi-instrument id="P1-I1"><midi-channel>1</midi-channel><midi-program>34</midi-program></midi-instrument>'
+        '<score-instrument id="P1-I1"><instrument-name>Fretless Bass</instrument-name></score-instrument>'
+        '<midi-instrument id="P1-I1"><midi-channel>1</midi-channel><midi-program>36</midi-program></midi-instrument>'
         '</score-part></part-list>'
         f'<part id="P1">{"".join(measures_xml)}</part>'
         "</score-partwise>"

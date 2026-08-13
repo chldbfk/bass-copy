@@ -136,22 +136,6 @@ try {{
 
   const api = new alphaTab.AlphaTabApi(document.getElementById('at-container'), settings);
   api.error.on((err) => showError('alphaTab.error', err));
-  api.renderStarted.on(() => showError('info', 'renderStarted'));
-  api.scoreLoaded.on((score) => {{
-    const staff = score.tracks[0]?.staves[0];
-    showError('info', `scoreLoaded: tracks=${{score.tracks.length}} bars=${{staff?.bars.length}}`);
-    showError('info', `staff: showTablature=${{staff?.showTablature}} showStandardNotation=${{staff?.showStandardNotation}} tuning=${{JSON.stringify(staff?.tuning)}} capo=${{staff?.capo}}`);
-    const bar0 = staff?.bars[0];
-    const voice0 = bar0?.voices[0];
-    showError('info', `bar0 voices=${{bar0?.voices.length}} beats=${{voice0?.beats.length}}`);
-    const beat0 = voice0?.beats[0];
-    showError('info', `beat0 notes=${{beat0?.notes.length}} note0.fret=${{beat0?.notes[0]?.fret}} note0.string=${{beat0?.notes[0]?.string}}`);
-  }});
-  api.renderFinished.on(() => showError('info', 'renderFinished'));
-  api.postRenderFinished.on(() => {{
-    showError('info', `postRenderFinished, container children=${{document.getElementById('at-container').children.length}}`);
-    showError('info', `container innerHTML length=${{document.getElementById('at-container').innerHTML.length}}`);
-  }});
 
   // --- 재생(사운드폰트 기반 오디오) ---
   const playBtn = document.getElementById('at-play-btn');
@@ -171,7 +155,6 @@ try {{
   api.playerStateChanged.on((e) => {{
     playBtn.textContent = e.state === alphaTab.synth.PlayerState.Playing ? '⏸' : '▶';
   }});
-  api.error.on((err) => showError('alphaTab.error', err));
 
   playBtn.addEventListener('click', () => api.playPause());
 
