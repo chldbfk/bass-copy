@@ -127,6 +127,7 @@ def main():
     notes_path = sys.argv[2] if len(sys.argv) > 2 else "poc_output.txt"
     output_path = sys.argv[3] if len(sys.argv) > 3 else "poc_final_tab_output.txt"
     chord_audio_path = sys.argv[4] if len(sys.argv) > 4 else None
+    apply_chromatic_slides = sys.argv[5].lower() not in ("0", "false") if len(sys.argv) > 5 else True
 
     print(f"[1/4] 노트 파싱: {notes_path}")
     notes = parse_notes(notes_path)
@@ -140,7 +141,7 @@ def main():
     quantized = quantize_notes(notes, tempo, beat_times)
 
     print("[4/4] 운지 최적화 및 렌더링")
-    path, groups = resolve_fingering(notes)
+    path, groups = resolve_fingering(notes, apply_chromatic_slides=apply_chromatic_slides)
     chords = detect_chords(chord_audio_path, tempo, beat_times) if chord_audio_path else {}
 
     tab_text = render_tab_by_measure(notes, path, quantized, groups=groups, chords=chords)

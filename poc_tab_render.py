@@ -365,7 +365,7 @@ def enforce_pitch_consistency(notes, path, pinned, fingering_overrides=None):
     return [choice_for(i, n) for i, n in enumerate(notes)]
 
 
-def resolve_fingering(notes, fingering_overrides=None):
+def resolve_fingering(notes, fingering_overrides=None, apply_chromatic_slides=True):
     """전체 운지 파이프라인. 크로매틱 런/옥타브 슬라이드/검증된 도약 슬라이드를 강제 배치한 뒤,
     그 노트들은 고정(pinned)한 채 나머지 노트의 앵커를 새 위치 기준으로 다시 계산해 재최적화한다.
 
@@ -373,12 +373,18 @@ def resolve_fingering(notes, fingering_overrides=None):
     슬라이드 적용 전(前) 위치를 기준으로 계산된 낡은 앵커를 그대로 따라가 버려서, 슬라이드
     직후에도 여전히 예전의 낮은 프렛(예: D현 1프렛)으로 튀는 부자연스러운 결과가 나왔음
     (실사용자 피드백으로 발견 — 슬라이드로 도착한 위치를 유지한 채 인접 줄의 같은 프렛을
-    쓰는 게 실제로 훨씬 편한 운지였음)."""
+    쓰는 게 실제로 훨씬 편한 운지였음).
+
+    apply_chromatic_slides=False: 크로매틱 런(반음 3연속)을 탐지는 하되 슬라이드로 강제
+    압축하지 않고 개별 노트 그대로 둔다. 빠른 곡에서는 크로매틱 런이 실제로 슬라이드가
+    아니라 개별 16분음표 연타인 경우가 많음(2026-08-21 돈룩백 곡에서 사용자가 준 정답
+    TAB과 비교해 확인 — [[feedback_chromatic_run_slide_fingering]] 원칙과 일치). 곡마다
+    이 런들을 사용자에게 보여주고 슬라이드로 처리할지 확인한 뒤 결정할 것, 추측 금지."""
     baseline_path = run_dp(notes)
     anchors1 = local_fret_anchors(baseline_path, window=ANCHOR_WINDOW)
     path = run_dp(notes, anchors=anchors1)
 
-    runs = find_chromatic_runs(notes)
+    runs = find_chromatic_runs(notes) if apply_chromatic_slides else []
     path = apply_chromatic_run_slides(notes, path, runs)
     octave_slides = detect_octave_slides(notes)
     path = apply_octave_slides(notes, path, octave_slides)

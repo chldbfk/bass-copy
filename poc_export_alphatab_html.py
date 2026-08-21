@@ -200,8 +200,10 @@ def main():
     output_path = sys.argv[4] if len(sys.argv) > 4 else "poc_score_alphatab.html"
     override_bpm = float(sys.argv[5]) if len(sys.argv) > 5 else None
     chord_audio_path = sys.argv[6] if len(sys.argv) > 6 else None
+    apply_chromatic_slides = sys.argv[7].lower() not in ("0", "false") if len(sys.argv) > 7 else True
 
-    xml, info = build_musicxml(notes_path, audio_path, title, override_bpm=override_bpm, chord_audio_path=chord_audio_path)
+    xml, info = build_musicxml(notes_path, audio_path, title, override_bpm=override_bpm, chord_audio_path=chord_audio_path,
+                                apply_chromatic_slides=apply_chromatic_slides)
 
     with open(f"{LIB_DIR}/alphaTab.min.js", "r", encoding="utf-8") as f:
         alphatab_js = f.read()

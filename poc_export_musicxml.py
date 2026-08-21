@@ -128,7 +128,8 @@ def harmony_xml(root_pc, quality, fifths):
 
 
 def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio_path=None, manual_chords=None,
-                    fingering_overrides=None, rhythm_grid=None, note_value_candidates=None, override_first_beat=None):
+                    fingering_overrides=None, rhythm_grid=None, note_value_candidates=None, override_first_beat=None,
+                    apply_chromatic_slides=True):
     """manual_chords: {마디번호: (root_pc, quality)} — 사용자가 실제 악보/코드보로 확인해준 정답이
     있을 때 오디오 기반 코드 인식(chord_audio_path) 대신 그대로 사용한다.
     note_value_candidates: 기본값 None이면 infer_note_grid()가 노트 타이밍(IOI) 분포를 보고
@@ -158,7 +159,8 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
         note_value_candidates = infer_note_grid(notes, tempo)
     quantized = quantize_notes(notes, tempo, beat_times, beats_per_measure=BEATS_PER_MEASURE,
                                 note_value_candidates=note_value_candidates)
-    path, groups = resolve_fingering(notes, fingering_overrides=fingering_overrides)
+    path, groups = resolve_fingering(notes, fingering_overrides=fingering_overrides,
+                                      apply_chromatic_slides=apply_chromatic_slides)
 
     if manual_chords is not None:
         chords = manual_chords
@@ -243,6 +245,14 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
                 f'<clef><sign>TAB</sign><line>5</line></clef>'
                 f"<staff-details><staff-lines>4</staff-lines>{tuning}</staff-details>"
                 f"</attributes>"
+                # 템포 표시(<direction>/<sound tempo>)가 없으면 AlphaTab 등 플레이어가 자체 기본
+                # 템포(보통 120BPM)로 재생해버림 — override_bpm으로 실제 곡 템포(예: 80.75)를
+                # 정확히 맞춰도 재생 속도엔 반영이 안 되는 문제가 있었음(2026-08-21 돈룩백 곡에서
+                # 사용자가 "재생이 원곡보다 빠르게 들린다"고 지적해 발견 — 120 BPM 아닌 다른 템포의
+                # 곡은 전부 이 영향을 받았을 것). 첫 마디에 실제 템포를 명시해서 고침.
+                f'<direction placement="above"><direction-type>'
+                f'<metronome><beat-unit>quarter</beat-unit><per-minute>{tempo:.2f}</per-minute></metronome>'
+                f'</direction-type><sound tempo="{tempo:.2f}"/></direction>'
             )
 
         chord_xml = harmony_xml(*chords[m], fifths) if m in chords else ""
