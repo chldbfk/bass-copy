@@ -124,7 +124,20 @@ def quantize_notes(notes, tempo, beat_times, beats_per_measure=4, note_value_can
     for n in notes:
         beat_pos = (n["start"] - first_beat) / beat_len
         measure = int((beat_pos + EPS) // beats_per_measure) + 1
-        beat_in_measure = (beat_pos + EPS) % beats_per_measure
+        beat_in_measure = round((beat_pos + EPS) % beats_per_measure, 2)
+
+        # EPS가 부동소수점 오차를 다 못 삼키는 경우가 있음(2026-08-21, 나는나비 마디4→5
+        # 경계에서 실측: beat_pos가 16.0에서 1.01e-6만큼 모자란 15.999998986 — EPS(1e-6)를
+        # 더해도 여전히 16.0 미만이라 // 나눗셈은 이전 마디(4)로 떨어지는데, 그 나머지값
+        # 3.999999986을 소수점 2자리로 반올림하면 4.0이 되어버려서, 있을 수 없는 "마디4의
+        # 4.0박"이라는 값이 생김 — 실제로는 마디5 1박(0.0)에 있어야 할 노트가 마디4에
+        # 갇혀버리고, 그 자리를 insert_rests()가 마디5 맨 앞 가짜 쉼표로 채워서 마디5부터
+        # 모든 노트가 반박자씩 밀려 보이는 결과가 나왔음. EPS 값을 계속 키워 맞추기보다,
+        # 반올림 후 결과가 마디 길이에 도달/초과하면 그 자체를 다음 마디 0박으로 넘겨서
+        # 근본적으로 막는다.
+        if beat_in_measure >= beats_per_measure:
+            measure += 1
+            beat_in_measure = 0.0
 
         dur_in_beats = n["dur"] / beat_len if "dur" in n else (n["end"] - n["start"]) / beat_len
         note_value = nearest_note_value(dur_in_beats, note_value_candidates)
@@ -132,7 +145,7 @@ def quantize_notes(notes, tempo, beat_times, beats_per_measure=4, note_value_can
         quantized.append({
             **n,
             "measure": measure,
-            "beat_in_measure": round(beat_in_measure, 2),
+            "beat_in_measure": beat_in_measure,
             "beat_dur": dur_in_beats,
             "note_value": note_value,
         })

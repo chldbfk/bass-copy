@@ -160,7 +160,19 @@ def transition_cost(prev, curr):
 
     if cs != ps:
         c += STRING_CHANGE_PENALTY
-    if cf == 0:
+    # OPEN_STRING_BONUS는 "개방현으로 새로 이동해 오는" 이득(손가락을 뗄 수 있는 편함)을
+    # 반영하려는 것이었는데, 원래 코드는 curr가 개방현이면 직전 노트와 완전히 같은 자리를
+    # 반복하는 경우(cs==ps and cf==pf, 즉 손이 전혀 움직이지 않는 반복 연주)에도 매번 다시
+    # 보너스를 깎아줬음 — 다른 프렛을 반복할 땐 정상적으로 비용 0인데 개방현만 반복마다
+    # 계속 "공짜 할인"이 누적돼(-1.0 x 반복횟수), 실제로는 한 줄에서 자연스럽게 이어치는
+    # 대안(예: 직전 노트 바로 옆 프렛)보다 굳이 다른 줄 개방현으로 건너가 눌러앉는 쪽이
+    # 총비용상 더 싸다고 잘못 계산되는 문제가 있었음(2026-08-21, 돈룩백 곡 2마디에서
+    # 사용자가 "직전 노트가 1번줄 4프렛인데 그 다음 A음을 2번줄 개방현 대신 1번줄 5프렛으로
+    # 쳐야 자연스럽다"고 지적해서 발견 — 실제로 이어지는 A음 반복 구간에서 이 보너스가
+    # 반복 누적되며 DP가 개방현 쪽을 선택해버렸음). 이제는 완전히 같은 자리를 반복하는
+    # 경우엔 보너스를 다시 주지 않는다(그런 반복은 어차피 d=0이라 비용이 이미 0이므로,
+    # 다른 프렛 반복과 동일하게 취급됨).
+    if cf == 0 and not (cs == ps and cf == pf):
         c -= OPEN_STRING_BONUS
     return c
 
@@ -345,7 +357,20 @@ def enforce_pitch_consistency(notes, path, pinned, fingering_overrides=None):
     2프렛으로) — 실제 연주자는 같은 리프를 매번 같은 자리로 짚으므로, 슬라이드로 이미
     고정된(pinned) 노트를 제외한 나머지는 같은 MIDI 음높이끼리 통일된 (줄,프렛)을 쓴다.
     fingering_overrides={midi: (string_idx, fret)}가 주어지면 다수결 대신 그 값을 그대로
-    쓴다(사용자가 직접 들어보고 특정 음의 자리를 지정해준 경우)."""
+    쓴다(사용자가 직접 들어보고 특정 음의 자리를 지정해준 경우).
+
+    2026-08-21 한때 "다수결 선택이 국소 전환비용을 개별 선택보다 많이 비싸게 만들면
+    다수결을 포기한다"는 cost_tolerance 가드를 추가했다가 같은 날 되돌림. 계기는 돈룩백
+    곡 2마디(A1 노트가 다수결로 A현 개방현이 됐는데 실제로는 직전 노트 바로 옆인 E현
+    5프렛이 이어치기 편함)였는데, 추적해보니 그 문제의 진짜 원인은 여기가 아니라
+    `transition_cost()`의 개방현 보너스 중복 계산 버그였음 — 그 버그를 고치고 나니
+    이 가드는 돈룩백에 아무 영향도 안 주는 채로 남아있었음. 그런데 이 가드가 Stand-By-Me
+    곡에서는 실제로 해를 끼침: 곡 전체에서 반복되는 A2 리프(16회)가 초반 5회(주변에
+    고포지션 이웃 노트)는 D현7프렛, 후반 11회(주변이 저포지션)는 G현2프렛으로 갈라져버림
+    — 사용자가 원곡을 직접 듣고 "처음부터 같은 자리로 통일하는 게 맞다"고 확인함. 즉
+    "리프는 항상 같은 자리로"가 실제 연주자의 습관에 더 가깝고, 국소 전환비용 차이만으로
+    예외를 허용하면 안 되는 경우였음(돈룩백은 애초에 이 함수와 무관한 문제였고, 반례로
+    쓰기엔 근거가 약했음). 다수결을 무조건 강제하는 원래 동작으로 되돌림."""
     fingering_overrides = fingering_overrides or {}
     from collections import Counter
     votes = {}
@@ -399,6 +424,20 @@ def resolve_fingering(notes, fingering_overrides=None, apply_chromatic_slides=Tr
         pinned[i], pinned[i + 1] = path[i], path[i + 1]
     for i in leap_slides:
         pinned[i], pinned[i + 1] = path[i], path[i + 1]
+
+    # fingering_overrides({midi:(string,fret)})도 슬라이드와 마찬가지로 anchors2 계산 전에
+    # 미리 path/pinned에 반영해야 함. 예전엔 이 단계를 건너뛰고 enforce_pitch_consistency에서
+    # 맨 마지막에만 덮어써서, override된 노트 바로 옆의 노트들은 override 적용 '전' 위치를
+    # 기준으로 이미 계산이 끝난 앵커/DP 결과를 그대로 썼음(2026-08-21 Stand-By-Me 마디3
+    # 사용자 지적으로 발견: A2를 D현7프렛으로 강제했는데도 바로 다음 G#2가 이어치기 좋은
+    # D현6프렛 대신 override 전 그대로 G현1프렛에 남아있었음 — 슬라이드 때와 똑같은
+    # 종류의 버그였음, 같은 방식으로 고침).
+    if fingering_overrides:
+        path = list(path)
+        for i, n in enumerate(notes):
+            if n["midi"] in fingering_overrides:
+                path[i] = fingering_overrides[n["midi"]]
+                pinned[i] = path[i]
 
     anchors2 = local_fret_anchors(path, window=ANCHOR_WINDOW)
     final_path = run_dp(notes, anchors=anchors2, pinned=pinned)

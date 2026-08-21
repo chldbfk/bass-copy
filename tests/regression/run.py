@@ -68,6 +68,9 @@ def run_fixture(fx):
 
     apply_slides = fx.get("apply_chromatic_slides", True)
     override_first_beat = fx.get("override_first_beat")
+    fingering_overrides = fx.get("fingering_overrides")  # {midi: (string_idx, fret)} —
+    # enforce_pitch_consistency의 다수결보다 사용자가 직접 확인해준 자리를 우선시할 때 씀
+    # (예: Stand-By-Me A2 리프, 2026-08-21 사용자가 D현7프렛으로 통일해달라고 확인).
 
     # --- MusicXML: build_musicxml이 내부에서 parse/filter/resolve/quantize를 전부 다시 수행 ---
     xml, info = build_musicxml(
@@ -76,6 +79,7 @@ def run_fixture(fx):
         note_value_candidates=note_value_candidates,
         override_first_beat=override_first_beat,
         apply_chromatic_slides=apply_slides,
+        fingering_overrides=fingering_overrides,
     )
 
     # --- ASCII TAB: render_tab_by_measure는 별도 조합이 필요(SKILL.md 4번 방식과 동일 순서) ---
@@ -87,7 +91,8 @@ def run_fixture(fx):
         beat_times = [override_first_beat]
     nvc = note_value_candidates if note_value_candidates is not None else infer_note_grid(notes, tempo)
     quantized = quantize_notes(notes, tempo, beat_times, note_value_candidates=nvc)
-    path, groups = resolve_fingering(notes, apply_chromatic_slides=apply_slides)
+    path, groups = resolve_fingering(notes, apply_chromatic_slides=apply_slides,
+                                      fingering_overrides=fingering_overrides)
     ascii_tab = render_tab_by_measure(notes, path, quantized, groups=groups)
 
     measure_beat_sums = _measure_beat_sums(ascii_tab)
