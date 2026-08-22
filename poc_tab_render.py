@@ -301,7 +301,11 @@ def apply_chromatic_run_slides(notes, path, runs):
 # 조건만으로는 두 경우를 구별할 수 없어(이 곡에서 실제로 오탐남), 지금은 사용자가 검증해준
 # (출발음, 도착음) 조합만 좁게 매칭한다. 더 일반적인 규칙(예: 원본 프레임 단위 피치 곡선에서
 # 실제 연속 글리산도 여부 확인)은 다른 곡 예시로 더 검증한 뒤 넓힐 것.
-VALIDATED_LEAP_SLIDES = [(31, 34)]  # (출발 MIDI, 도착 MIDI) — G1 -> A#1
+VALIDATED_LEAP_SLIDES = [
+    (31, 34),  # G1 -> A#1
+    (38, 45),  # D2 -> A2 (Come Together, 2026-08-22: 사용자가 원곡 정답 TAB으로 확인해준
+    # 반복 리프 — A현 5프렛 -> A현 12프렛 슬라이드, +7반음)
+]  # (출발 MIDI, 도착 MIDI)
 LEAP_SLIDE_MAX_GAP = 0.3
 
 

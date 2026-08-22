@@ -129,14 +129,27 @@ def harmony_xml(root_pc, quality, fifths):
 
 def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio_path=None, manual_chords=None,
                     fingering_overrides=None, rhythm_grid=None, note_value_candidates=None, override_first_beat=None,
-                    apply_chromatic_slides=True):
+                    apply_chromatic_slides=True, groups_override=None, falloff_indices=None):
     """manual_chords: {마디번호: (root_pc, quality)} — 사용자가 실제 악보/코드보로 확인해준 정답이
     있을 때 오디오 기반 코드 인식(chord_audio_path) 대신 그대로 사용한다.
     note_value_candidates: 기본값 None이면 infer_note_grid()가 노트 타이밍(IOI) 분포를 보고
     SIMPLE_NOTE_VALUES(4분/8분만) vs NOTE_VALUES(16분까지) 중 알아서 고른다 — 곡마다 사람이
     "이 곡은 단순하니까 SIMPLE" 같은 판단을 손으로 넘길 필요 없음. 그래도 특정 값을 강제하고
     싶으면 poc_rhythm_quantize.SIMPLE_NOTE_VALUES/NOTE_VALUES를 직접 넘기면 됨.
-    rhythm_grid: 그래도 잔여 잡음이 있을 때 snap_notes_to_grid()의 grid_beats 값을 넘긴다."""
+    rhythm_grid: 그래도 잔여 잡음이 있을 때 snap_notes_to_grid()의 grid_beats 값을 넘긴다.
+    falloff_indices: {노트 인덱스, ...} — 목적지 음이 정해지지 않은 "흘러내리는" 슬라이드
+    (예: 마디 끝에서 프렛을 짚은 채 낮은 쪽으로 슬쩍 흘려 내리는 장식주법, "0프렛 쪽으로
+    슬라이드"처럼 도착 프렛이 특정되지 않음).
+    **1차 시도(<falloff/>) 실패 기록**: MusicXML 표준 아티큘레이션 <falloff/>를 처음 썼으나
+    AlphaTab의 MusicXmlImporter 소스(alphatab_source/.../MusicXmlImporter.ts:3494)를 직접
+    확인해보니 falloff/doit/scoop/plop는 전부 "Not Supported"로 명시돼 있어 렌더링에서
+    완전히 무시됨(2026-08-22, 사용자가 "슬라이드 표시가 없다"고 확인해줌). AlphaTab이 실제로
+    지원하는 건 <slide type="start"/>~<slide type="stop"/> 페어(우리가 다른 슬라이드에도
+    쓰는 것)뿐이라, 도착 음이 없어도 렌더링하려면 도착점이 실제로 있어야 함 — 그래서 해당
+    현의 개방현(프렛0) 자리에 아주 짧은 그레이스노트(<grace slash="yes"/>, 정박 박자를
+    소비하지 않음)를 하나 만들어 슬라이드 도착점으로 삼는다. 원래 노트에 slide-start,
+    그레이스노트에 slide-stop을 붙이면 AlphaTab이 실제로 슬라이드 라인을 그린다."""
+    falloff_indices = falloff_indices or set()
     notes = parse_notes(notes_path)
     notes = filter_scale_noise(notes)
 
@@ -161,6 +174,12 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
                                 note_value_candidates=note_value_candidates)
     path, groups = resolve_fingering(notes, fingering_overrides=fingering_overrides,
                                       apply_chromatic_slides=apply_chromatic_slides)
+    if groups_override is not None:
+        # 자동 슬라이드 탐지가 오탐하는 경우(예: 2026-08-22 Come Together — 사용자가 준
+        # 정답 리프를 마디 경계 없이 이어붙였더니 마디 끝 노트와 다음 마디 시작 노트가
+        # 우연히 정확히 1옥타브 차이라 detect_octave_slides가 "마디 사이 쉼표"를 슬라이드로
+        # 잘못 묶어버림) 사용자가 이미 확인해준 슬라이드 목록으로 통째로 교체한다.
+        groups = groups_override
 
     if manual_chords is not None:
         chords = manual_chords
@@ -224,12 +243,26 @@ def build_musicxml(notes_path, audio_path, title, override_bpm=None, chord_audio
                     slide_xml += '<slide type="stop"/>'
                 if e["note_idx"] in slide_starts:
                     slide_xml += '<slide type="start" line-type="solid"/>'
+                is_falloff = e["note_idx"] in falloff_indices
+                if is_falloff:
+                    slide_xml += '<slide type="start" line-type="solid"/>'
                 notes_xml.append(
                     f"<note><pitch><step>{step}</step>{alter_xml}<octave>{octave}</octave></pitch>"
                     f'<duration>{dur}</duration><instrument id="P1-I1"/><voice>1</voice><type>{note_type}</type>{dot_xml}{beam_xml}'
                     f"<notations>{slide_xml}<technical><string>{s_idx + 1}</string><fret>{fret}</fret></technical></notations>"
                     f"</note>"
                 )
+                if is_falloff:
+                    # 목적지 음이 없는 슬라이드-오프: 해당 현의 개방현(프렛0)에 짧은
+                    # 그레이스노트를 만들어 슬라이드 도착점으로 삼는다(위 docstring 참고).
+                    open_step, open_alter, open_octave = midi_to_pitch(STRINGS[s_idx][1], fifths)
+                    open_alter_xml = f"<alter>{open_alter}</alter>" if open_alter else ""
+                    notes_xml.append(
+                        f"<note><grace slash=\"yes\"/><pitch><step>{open_step}</step>{open_alter_xml}<octave>{open_octave}</octave></pitch>"
+                        f'<instrument id="P1-I1"/><voice>1</voice><type>16th</type>'
+                        f'<notations><slide type="stop"/><technical><string>{s_idx + 1}</string><fret>0</fret></technical></notations>'
+                        f"</note>"
+                    )
 
         attrs_xml = ""
         if m == sorted(quantized_by_measure.keys())[0]:

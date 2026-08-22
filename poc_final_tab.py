@@ -14,16 +14,41 @@ BEATS_PER_MEASURE = 4
 NAME_TO_BEATS = {name: beats for beats, name in NOTE_VALUES}
 
 
+def _split_into_vocab(budget, k, valid_beats, original=None):
+    """budget(박)을 valid_beats(어휘에 실제 존재하는 박자값들)에서 정확히 k개 골라
+    합이 budget이 되는 조합을 찾는다. original(같은 길이 k)이 주어지면 그것과 가장
+    가까운 조합을 우선한다. 못 찾으면 None."""
+    from itertools import product
+    best, best_score = None, None
+    for combo in product(valid_beats, repeat=k):
+        if round(sum(combo) - budget, 6) != 0:
+            continue
+        score = sum(abs(c - o) for c, o in zip(combo, original)) if original else 0
+        if best is None or score < best_score:
+            best, best_score = combo, score
+    return list(best) if best is not None else None
+
+
 def _close_measure_labels(events, rest_candidates):
     """insert_rests가 채우는 실제 커서 계산(박자 길이)은 항상 정확한데, 표시용 라벨은
     각 조각을 독립적으로 가장 가까운 이름에 반올림하다 보니(특히 SIMPLE 어휘에 없는
     자투리 값) 라벨끼리 더하면 4박을 넘거나 모자라 보이는 경우가 있었음
     (예: 마디4에서 실제 0.24박짜리 쉼표가 "8분음표(0.5박)"로 표시돼 라벨 합계가 4.5박이
     되어버림 — 사용자가 직접 세어보고 지적함, 2026-08-12). 여기서 라벨이 나타내는 박자를
-    역산해 grid 단위로 반올림하고, 오차를 마지막 항목에 몰아 라벨 합계가 항상 정확히
+    역산해 grid 단위로 반올림하고, 오차를 뒤쪽 항목들에 몰아 라벨 합계가 항상 정확히
     BEATS_PER_MEASURE가 되도록 보정한다. (내부 타이밍/MusicXML은 원래도 정확했으므로
-    건드리지 않고, 사람이 읽는 라벨 표기만 고친다.)"""
+    건드리지 않고, 사람이 읽는 라벨 표기만 고친다.)
+
+    **주의(2026-08-22, Come-Together 세션에서 발견된 버그 수정)**: 마디 끝까지 길게
+    이어지는 노트가 있으면 보정에 필요한 목표값이 1.25박처럼 어휘(NOTE_VALUES)에
+    아예 존재하지 않는 값이 될 수 있음 — 예전엔 이걸 그냥 마지막 항목 하나에만 몰아
+    넣었는데, `nearest_note_value`가 그 값을 어휘에 있는 가장 가까운 이름으로 다시
+    반올림하면서 조용히 오차가 재발했었음(라벨 합계가 다시 4박을 벗어남). 이제는 뒤에서부터
+    항목을 하나씩 늘려가며(`_split_into_vocab`) 어휘만으로 정확히 표현 가능한 조합을
+    찾을 때까지 시도한다 — 항상 정확한 조합이 존재함이 보장됨(최소단위 grid로는 항상
+    나누어떨어지므로, k를 충분히 늘리면 반드시 grid만 반복해서라도 맞출 수 있음)."""
     grid = min(beats for beats, _ in rest_candidates)
+    valid_beats = sorted({b for b, _ in NOTE_VALUES}, reverse=True)
 
     def label_of(e):
         return e["value"].replace("(슬라이드)", "") if e["type"] == "note" else e["note_value"]
@@ -31,11 +56,16 @@ def _close_measure_labels(events, rest_candidates):
     rounded = [round(NAME_TO_BEATS.get(label_of(e), grid) / grid) * grid or grid for e in events]
     diff = round(BEATS_PER_MEASURE - sum(rounded), 6)
     if events and diff != 0:
-        adjusted = rounded[-1] + diff
-        if adjusted < grid:  # 마지막 항목이 grid 밑으로 내려가면 그 앞 항목에 넘겨서 흡수
-            rounded[-2] = max(grid, rounded[-2] + adjusted - grid) if len(rounded) > 1 else rounded[-2]
-            adjusted = grid
-        rounded[-1] = adjusted
+        n = len(rounded)
+        for k in range(1, n + 1):
+            budget = round(sum(rounded[n - k:]) + diff, 6)
+            split = _split_into_vocab(budget, k, valid_beats, original=rounded[n - k:])
+            if split is not None:
+                rounded[n - k:] = split
+                break
+        else:
+            # 극단적 예외(어휘 최소단위로도 안 맞아떨어지는 경우) — 기존 방식으로 최후 안전망
+            rounded[-1] = max(grid, rounded[-1] + diff)
 
     for e, beats in zip(events, rounded):
         new_label = nearest_note_value(beats, NOTE_VALUES)
@@ -64,13 +94,18 @@ def build_display_units(notes, groups):
     return units
 
 
-def render_tab_by_measure(notes, path, quantized, groups=(), chords=None):
+def render_tab_by_measure(notes, path, quantized, groups=(), chords=None, falloff_indices=None):
     """4/4 기준으로 각 마디가 실제로 4박을 다 채우도록, 연주된 노트 사이 빈 구간은
     쉼표 칸으로 명시해서 그린다 — 예전엔 연주된 노트만 나열해서(쉼표 미표시) 마디 합계가
     4박에 못 미치는 것처럼 보였음(사용자 지적으로 발견, 2026-08-12). MusicXML(build_musicxml)은
-    처음부터 insert_rests()로 쉼표를 채워왔으니 여기서도 같은 함수를 재사용한다."""
+    처음부터 insert_rests()로 쉼표를 채워왔으니 여기서도 같은 함수를 재사용한다.
+
+    falloff_indices: {노트 인덱스, ...} — 목적지 음 없이 흘러내리는 슬라이드(2026-08-22,
+    Come Together D현12프렛 슬라이드-오프). ASCII TAB에서는 프렛 번호 뒤에 "\\"를 붙여
+    표시한다(관용적인 슬라이드-다운 표기, MusicXML의 <falloff/>와 짝을 이룸)."""
     units = build_display_units(notes, groups)
     chords = chords or {}
+    falloff_indices = falloff_indices or set()
 
     # 렌더링 단위(슬라이드 그룹 포함) -> 마디별 노트 목록. 슬라이드 그룹은 시작~끝을 합친
     # 하나의 박자 길이(beat_dur)로 묶어서 insert_rests가 그룹 전체를 하나의 이벤트로 보게 한다.
@@ -79,6 +114,8 @@ def render_tab_by_measure(notes, path, quantized, groups=(), chords=None):
         s_idx, fret_start = path[i]
         _, fret_end = path[j]
         cell = f"{fret_start}/{fret_end}" if j > i else str(fret_start)
+        if j in falloff_indices:
+            cell += "\\"
         q_start, q_end = quantized[i], quantized[j]
         value = q_start["note_value"] if j == i else f"{q_start['note_value']}(슬라이드)"
         beat_dur = (q_end["beat_in_measure"] + q_end["beat_dur"]) - q_start["beat_in_measure"] if j > i else q_start["beat_dur"]

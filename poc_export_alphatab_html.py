@@ -77,7 +77,7 @@ footer {{
   <h1>{title_html}</h1>
   <div class="meta">
     <span>조성 <b>{key_label}</b></span>
-    <span>템포 <b>{tempo:.1f} BPM</b></span>
+    <span>템포 <b>{tempo:.0f} BPM</b></span>
     <span>마디 <b>{measure_count}</b></span>
   </div>
 </header>
